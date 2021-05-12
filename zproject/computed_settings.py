@@ -362,7 +362,7 @@ CACHES = {
 
 RATE_LIMITING_RULES = {
     'api_by_user': [
-        (60, 200),  # 200 requests max every minute
+        (60, 10000),  # 10000 requests max every minute
     ],
     'authenticate_by_username': [
         (1800, 5),  # 5 login attempts within 30 minutes

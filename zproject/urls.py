@@ -18,6 +18,7 @@ import zerver.tornado.views
 import zerver.views
 import zerver.views.archive
 import zerver.views.auth
+import zerver.views.zauth
 import zerver.views.camo
 import zerver.views.compatibility
 import zerver.views.digest
@@ -435,6 +436,14 @@ i18n_urls = [
     path('accounts/login/start/sso/', zerver.views.auth.start_remote_user_sso, name='start-login-sso'),
     path('accounts/login/sso/', zerver.views.auth.remote_user_sso, name='login-sso'),
     path('accounts/login/jwt/', zerver.views.auth.remote_user_jwt, name='login-jwt'),
+
+    # Zimbra customizations
+    path('zjwt/login/', zerver.views.zauth.remote_zimbra_jwt, name='login-jwt'),
+    path('zjwt/create_realm/', zerver.views.zauth.zimbra_create_realm, name='create-realm'),
+    path('zjwt/get_api_key/', zerver.views.zauth.zimbra_api_key, name='get-api'),
+    path('zjwt/allow_domain_realm/', zerver.views.zauth.zimbra_allow_domain_realm, name='allow-domain-realm'),
+    path('zjwt/deactivate_realm/', zerver.views.zauth.zimbra_deactivate_realm, name='deactivate-realm'),
+
     re_path(r'^accounts/login/social/([\w,-]+)$', zerver.views.auth.start_social_login,
             name='login-social'),
     re_path(r'^accounts/login/social/([\w,-]+)/([\w,-]+)$', zerver.views.auth.start_social_login,

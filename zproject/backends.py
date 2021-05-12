@@ -299,6 +299,12 @@ class ZulipDummyBackend(ZulipAuthMixin):
                      use_dummy_backend: bool=False,
                      return_data: Optional[Dict[str, Any]]=None) -> Optional[UserProfile]:
         if use_dummy_backend:
+            ldapbackend = next((backend for backend in get_backends() if isinstance(backend, ZulipLDAPAuthBackend)), None)
+            ldap_username = ldapbackend.django_to_ldap_username(username)
+            ldapbackend._realm = realm
+            ldapbackend._prereg_user = None
+            ldap_user = _LDAPUser(ldapbackend, ldap_username)
+            ldapbackend.get_or_build_user(username, ldap_user)
             return common_get_active_user(username, realm, return_data)
         return None
 
