@@ -642,7 +642,7 @@ ENABLE_FILE_LINKS = False
 ## need to manually edit Zulip's nginx configuration to use the new
 ## path.  For that reason, we recommend replacing /home/zulip/uploads
 ## with a symlink instead of changing LOCAL_UPLOADS_DIR.
-LOCAL_UPLOADS_DIR = "/home/zulip/uploads"
+LOCAL_UPLOADS_DIR = "/opt/zimbra/data/zulip/uploads"
 # S3_AUTH_UPLOADS_BUCKET = ""
 # S3_AVATAR_BUCKET = ""
 # S3_REGION = None

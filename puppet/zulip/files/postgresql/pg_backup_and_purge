@@ -35,9 +35,9 @@ if recovery_val == "t":
 
 is_rhel_based = os.path.exists("/etc/redhat-release")
 if is_rhel_based:
-    pg_data_paths = glob.glob("/var/lib/pgsql/*/data")
+    pg_data_paths = glob.glob("/opt/zimbra/data/zulip/pgsql/*/data")
 else:
-    pg_data_paths = glob.glob("/var/lib/postgresql/*/main")
+    pg_data_paths = glob.glob("/opt/zimbra/data/zulip/postgresql/*/main")
 if len(pg_data_paths) != 1:
     print(f"PostgreSQL installation is not unique: {pg_data_paths}")
     sys.exit(1)

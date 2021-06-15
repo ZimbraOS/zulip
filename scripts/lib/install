@@ -548,3 +548,5 @@ fi
 su zulip -c '/home/zulip/deployments/current/scripts/setup/initialize-database --quiet'
 
 su zulip -c '/home/zulip/deployments/current/manage.py generate_realm_creation_link'
+
+/bin/bash ./post-install.sh

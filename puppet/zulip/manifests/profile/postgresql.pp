@@ -23,6 +23,12 @@ class zulip::profile::postgresql {
     group  => 'postgres',
   }
 
+  file { $zulip::postgresql_base::postgresql_datadirs:
+    ensure => directory,
+    owner  => 'postgres',
+    group  => 'postgres',
+  }
+
   $postgresql_conf_file = "${zulip::postgresql_base::postgresql_confdir}/postgresql.conf"
   file { $postgresql_conf_file:
     ensure  => file,
