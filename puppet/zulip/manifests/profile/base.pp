@@ -150,4 +150,9 @@ class zulip::profile::base {
     mode    => '0755',
     source  => 'puppet:///modules/zulip/nagios_plugins/zulip_base',
   }
+
+    file { "${::zulip_scripts_path}/post-install.sh":
+    group  => 'zulip',
+    mode   => '0774',
+  }
 }
