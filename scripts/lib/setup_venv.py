@@ -82,7 +82,18 @@ def get_venv_dependencies(vendor: str, os_version: str) -> List[str]:
 
 
 def install_venv_deps(pip: str, requirements_file: str) -> None:
-    pip_requirements = os.path.join(ZULIP_PATH, "requirements", "pip.txt")
+    list_wheel_1 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/1")
+    list_wheel_2 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/2")
+    list_wheel_3  = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/3")
+    for i in list_wheel_1:
+        run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/1/"+i])
+
+    for j in list_wheel_2:
+        run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/2/"+j])
+
+    for k in list_wheel_3:
+        run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/3/"+k])
+'''     pip_requirements = os.path.join(ZULIP_PATH, "requirements", "pip.txt")
     run([pip, "install", "--force-reinstall", "--require-hashes", "-r", pip_requirements])
     run(
         [
@@ -94,7 +105,7 @@ def install_venv_deps(pip: str, requirements_file: str) -> None:
             "-r",
             requirements_file,
         ]
-    )
+    ) '''
 
 
 def get_index_filename(venv_path: str) -> str:
