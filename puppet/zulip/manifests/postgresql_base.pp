@@ -12,15 +12,7 @@ class zulip::postgresql_base {
         "/etc/postgresql/${zulip::postgresql_common::version}/main",
       ]
       $postgresql_confdir = $postgresql_confdirs[-1]
-      $postgresql_datadirs = [
-        "/opt/zimbra",
-        "/opt/zimbra/data",
-        "/opt/zimbra/data/zulip",
-        "/opt/zimbra/data/zulip/postgresql",
-        "/opt/zimbra/data/zulip/postgresql/${zulip::postgresql_common::version}",
-        "/opt/zimbra/data/zulip/postgresql/${zulip::postgresql_common::version}/main",
-      ]
-      $postgresql_datadir = "/opt/zimbra/data/zulip/postgresql/${zulip::postgresql_common::version}/main"
+      $postgresql_datadir = "/var/lib/postgresql/${zulip::postgresql_common::version}/main"
       $tsearch_datadir = "${postgresql_sharedir}/tsearch_data"
       $pgroonga_setup_sql_path = "${postgresql_sharedir}/pgroonga_setup.sql"
       $setup_system_deps = 'setup_apt_repo'
@@ -36,15 +28,7 @@ class zulip::postgresql_base {
         "/var/lib/pgsql/${zulip::postgresql_common::version}/data",
       ]
       $postgresql_confdir = $postgresql_confdirs[-1]
-      $postgresql_datadirs = [
-        "/opt/zimbra",
-        "/opt/zimbra/data",
-        "/opt/zimbra/data/zulip",
-        "/opt/zimbra/data/zulip/pgsql",
-        "/opt/zimbra/data/zulip/pgsql/${zulip::postgresql_common::version}",
-        "/opt/zimbra/data/zulip/pgsql/${zulip::postgresql_common::version}/data",
-      ]
-      $postgresql_datadir = "/opt/zimbra/data/zulip/pgsql/${zulip::postgresql_common::version}/data"
+      $postgresql_datadir = "/var/lib/pgsql/${zulip::postgresql_common::version}/data"
       $tsearch_datadir = "${postgresql_sharedir}/tsearch_data/"
       $pgroonga_setup_sql_path = "${postgresql_sharedir}/pgroonga_setup.sql"
       $setup_system_deps = 'setup_yum_repo'

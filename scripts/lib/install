@@ -549,4 +549,4 @@ su zulip -c '/home/zulip/deployments/current/scripts/setup/initialize-database -
 
 su zulip -c '/home/zulip/deployments/current/manage.py generate_realm_creation_link'
 
-/bin/bash ./post-install.sh
+/bin/bash ./post-install.sh -POSTGRESQL_VERSION=$POSTGRESQL_VERSION -OS_ID=$os_id -OS_VERSION=$os_version_id
