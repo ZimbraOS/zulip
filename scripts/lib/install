@@ -578,8 +578,8 @@ fi
 echo "Update postgress data dir to $POSTGRESQL_DATA_DIR"
 sed -zi 's/data_directory =[^\n]*/data_directory = \/opt\/zimbra\/data\/zulip\/postgresql\/13\/data/g' $POSTGRESQL_CONF_PATH
 systemctl stop postgresql
-rsync -av /var/lib/postgresql/$POSTGRESQL_VERSION $POSTGRESQL_DIR
 chown postgres:postgres $POSTGRESQL_DATA_DIR
+rsync -av /var/lib/postgresql/$POSTGRESQL_VERSION $POSTGRESQL_DIR
 systemctl start postgresql
 
 # change rabbitmq data path
