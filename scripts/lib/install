@@ -504,6 +504,46 @@ if has_class "zulip::postgresql_common" && [ -z "$NO_INIT_DB" ]; then
     "$ZULIP_PATH"/scripts/setup/postgresql-init-db
 fi
 
+DATA_DIR=/opt/zimbra/data/zulip
+POSTGRESQL_DIR=$DATA_DIR/postgresql
+RABBITMQ_DIR=$DATA_DIR/rabbitmq
+POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/data
+RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
+POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
+
+
+if [ ! -d "$DATA_DIR" ]; then
+    echo "Create directory $DATA_DIR"
+    mkdir -p "$DATA_DIR"
+fi
+
+if [ ! -d "$POSTGRESQL_DATA_DIR" ]; then
+    echo "Create directory $POSTGRESQL_DATA_DIR"
+    mkdir -p "$POSTGRESQL_DATA_DIR"
+fi
+
+if [ ! -d "$RABBITMQ_DIR" ]; then
+    echo "Create directory $RABBITMQ_DIR"
+    mkdir -p "$RABBITMQ_DIR"
+fi
+
+
+# change postgres data path 
+echo "Update postgress data dir to $POSTGRESQL_DATA_DIR"
+sed -zi 's/data_directory =[^\n]*/data_directory = \/opt\/zimbra\/data\/zulip\/postgresql\/13\/data/g' $POSTGRESQL_CONF_PATH
+systemctl stop postgresql
+chown postgres:postgres $POSTGRESQL_DATA_DIR
+rsync -av /var/lib/postgresql/$POSTGRESQL_VERSION $POSTGRESQL_DIR
+systemctl start postgresql
+
+# change rabbitmq data path
+echo "Update rabbitmq data dir to $RABBITMQ_DIR"
+systemctl stop rabbitmq-server
+sed -zi '/RABBITMQ_MNESIA_BASE=\/rabbitmq/!s/$/\nRABBITMQ_MNESIA_BASE=\/opt\/zimbra\/data\/zulip\/rabbitmq\n/' $RABBITMQ_CONF_PATH
+chown rabbitmq:rabbitmq $RABBITMQ_DIR
+systemctl start rabbitmq-server
+
+
 if has_class "zulip::app_frontend_base"; then
     deploy_path=$("$ZULIP_PATH"/scripts/lib/zulip_tools.py make_deploy_path)
     mv "$ZULIP_PATH" "$deploy_path"
@@ -550,41 +590,3 @@ su zulip -c '/home/zulip/deployments/current/scripts/setup/initialize-database -
 su zulip -c '/home/zulip/deployments/current/manage.py generate_realm_creation_link'
 
 
-DATA_DIR=/opt/zimbra/data/zulip
-POSTGRESQL_DIR=$DATA_DIR/postgresql
-RABBITMQ_DIR=$DATA_DIR/rabbitmq
-POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/data
-RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
-POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
-
-
-if [ ! -d "$DATA_DIR" ]; then
-    echo "Create directory $DATA_DIR"
-    mkdir -p "$DATA_DIR"
-fi
-
-if [ ! -d "$POSTGRESQL_DATA_DIR" ]; then
-    echo "Create directory $POSTGRESQL_DATA_DIR"
-    mkdir -p "$POSTGRESQL_DATA_DIR"
-fi
-
-if [ ! -d "$RABBITMQ_DIR" ]; then
-    echo "Create directory $RABBITMQ_DIR"
-    mkdir -p "$RABBITMQ_DIR"
-fi
-
-
-# change postgres data path 
-echo "Update postgress data dir to $POSTGRESQL_DATA_DIR"
-sed -zi 's/data_directory =[^\n]*/data_directory = \/opt\/zimbra\/data\/zulip\/postgresql\/13\/data/g' $POSTGRESQL_CONF_PATH
-systemctl stop postgresql
-chown postgres:postgres $POSTGRESQL_DATA_DIR
-rsync -av /var/lib/postgresql/$POSTGRESQL_VERSION $POSTGRESQL_DIR
-systemctl start postgresql
-
-# change rabbitmq data path
-echo "Update rabbitmq data dir to $RABBITMQ_DIR"
-systemctl stop rabbitmq-server
-sed -zi '/RABBITMQ_MNESIA_BASE=\/rabbitmq/!s/$/\nRABBITMQ_MNESIA_BASE=\/opt\/zimbra\/data\/zulip\/rabbitmq\n/' $RABBITMQ_CONF_PATH
-chown rabbitmq:rabbitmq $RABBITMQ_DIR
-systemctl start rabbitmq-server
