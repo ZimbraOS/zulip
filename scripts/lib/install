@@ -490,6 +490,8 @@ RABBITMQ_DIR=$DATA_DIR/rabbitmq
 POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/main
 RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
 POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
+ZULIP_UPLOAD_DIR=/home/zulip/uploads
+ZIMBRA_ZULIP_UPLOAD_DIR=$DATA_DIR/uploads
 
 
 if [ ! -d "$DATA_DIR" ]; then
@@ -506,6 +508,15 @@ if [ ! -d "$RABBITMQ_DIR" ]; then
     echo "Create directory $RABBITMQ_DIR"
     mkdir -p "$RABBITMQ_DIR"
 fi
+
+if [ ! -d "$ZIMBRA_ZULIP_UPLOAD_DIR" ]; then
+    echo "Create directory $ZIMBRA_ZULIP_UPLOAD_DIR"
+    mkdir -p "$ZIMBRA_ZULIP_UPLOAD_DIR"
+fi
+
+# change upload data path
+chown zulip:zulip $ZIMBRA_ZULIP_UPLOAD_DIR
+ln -s $ZIMBRA_ZULIP_UPLOAD_DIR $ZULIP_UPLOAD_DIR
 
 
 # change postgres data path 
