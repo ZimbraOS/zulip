@@ -553,7 +553,7 @@ su zulip -c '/home/zulip/deployments/current/manage.py generate_realm_creation_l
 DATA_DIR=/opt/zimbra/data/zulip
 POSTGRESQL_DIR=$DATA_DIR/postgresql
 RABBITMQ_DIR=$DATA_DIR/rabbitmq
-POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/13/data
+POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/data
 RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
 POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
 
@@ -563,9 +563,9 @@ if [ ! -d "$DATA_DIR" ]; then
     mkdir -p "$DATA_DIR"
 fi
 
-if [ ! -d "$POSTGRESQL_DIR" ]; then
-    echo "Create directory $POSTGRESQL_DIR"
-    mkdir -p "$POSTGRESQL_DIR"
+if [ ! -d "$POSTGRESQL_DATA_DIR" ]; then
+    echo "Create directory $POSTGRESQL_DATA_DIR"
+    mkdir -p "$POSTGRESQL_DATA_DIR"
 fi
 
 if [ ! -d "$RABBITMQ_DIR" ]; then
@@ -575,11 +575,11 @@ fi
 
 
 # change postgres data path 
-echo "Update postgress data dir to $POSTGRESQL_DIR"
+echo "Update postgress data dir to $POSTGRESQL_DATA_DIR"
 sed -zi 's/data_directory =[^\n]*/data_directory = \/opt\/zimbra\/data\/zulip\/postgresql\/13\/data/g' $POSTGRESQL_CONF_PATH
-chown postgres:postgres $POSTGRESQL_DATA_DIR
 systemctl stop postgresql
 rsync -av /var/lib/postgresql/$POSTGRESQL_VERSION $POSTGRESQL_DIR
+chown postgres:postgres $POSTGRESQL_DATA_DIR
 systemctl start postgresql
 
 # change rabbitmq data path
