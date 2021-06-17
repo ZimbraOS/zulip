@@ -103,6 +103,14 @@ while true; do
             NO_DIST_UPGRADE=1
             shift
             ;;
+        --ldap-server)
+            LDAP_SERVER="$2"
+            shift
+            ;;
+        --ldap-password)
+            LDAP_PASSWORD="$2"
+            shift
+            ;;
         --)
             shift
             break
@@ -573,6 +581,9 @@ if has_class "zulip::app_frontend_base"; then
         su zulip -c '/home/zulip/deployments/current/tools/update-prod-static'
     fi
 fi
+
+sed -e '/^\(AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*\).*/{s//\1ldap:\/\/@LDAP_SERVER/;:a;n;ba;q}' -e '$aAUTH_LDAP_SERVER_URI=ldap:\/\/@LDAP_SERVER' /etc/zulip/settings.py
+
 
 # Set up a basic .gitconfig for the 'zulip' user
 (
