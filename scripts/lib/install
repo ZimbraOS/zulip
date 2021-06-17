@@ -553,7 +553,7 @@ su zulip -c '/home/zulip/deployments/current/manage.py generate_realm_creation_l
 DATA_DIR=/opt/zimbra/data/zulip
 POSTGRESQL_DIR=$DATA_DIR/postgresql
 RABBITMQ_DIR=$DATA_DIR/rabbitmq
-POSTGRESQL_DATA_DIR=$POSTGRES_DIR/13/data
+POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/13/data
 RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
 POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
 
