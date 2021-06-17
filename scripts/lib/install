@@ -484,26 +484,6 @@ EOF
     fi
 fi
 
-if has_class "zulip::profile::rabbitmq"; then
-    if ! rabbitmqctl status >/dev/null; then
-        set +x
-        cat <<EOF
-
-RabbitMQ seems to not have started properly after the installation process.
-Often this is caused by misconfigured /etc/hosts in virtualized environments.
-For more information, see:
-  https://github.com/zulip/zulip/issues/53#issuecomment-143805121
-
-EOF
-        exit 1
-    fi
-    "$ZULIP_PATH"/scripts/setup/configure-rabbitmq
-fi
-
-if has_class "zulip::postgresql_common" && [ -z "$NO_INIT_DB" ]; then
-    "$ZULIP_PATH"/scripts/setup/postgresql-init-db
-fi
-
 DATA_DIR=/opt/zimbra/data/zulip
 POSTGRESQL_DIR=$DATA_DIR/postgresql
 RABBITMQ_DIR=$DATA_DIR/rabbitmq
@@ -543,6 +523,26 @@ sed -zi '/RABBITMQ_MNESIA_BASE=\/rabbitmq/!s/$/\nRABBITMQ_MNESIA_BASE=\/opt\/zim
 chown rabbitmq:rabbitmq $RABBITMQ_DIR
 systemctl start rabbitmq-server
 
+
+if has_class "zulip::profile::rabbitmq"; then
+    if ! rabbitmqctl status >/dev/null; then
+        set +x
+        cat <<EOF
+
+RabbitMQ seems to not have started properly after the installation process.
+Often this is caused by misconfigured /etc/hosts in virtualized environments.
+For more information, see:
+  https://github.com/zulip/zulip/issues/53#issuecomment-143805121
+
+EOF
+        exit 1
+    fi
+    "$ZULIP_PATH"/scripts/setup/configure-rabbitmq
+fi
+
+if has_class "zulip::postgresql_common" && [ -z "$NO_INIT_DB" ]; then
+    "$ZULIP_PATH"/scripts/setup/postgresql-init-db
+fi
 
 if has_class "zulip::app_frontend_base"; then
     deploy_path=$("$ZULIP_PATH"/scripts/lib/zulip_tools.py make_deploy_path)
