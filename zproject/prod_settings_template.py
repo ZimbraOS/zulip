@@ -152,7 +152,8 @@ AUTHENTICATION_BACKENDS: Tuple[str, ...] = (
     # 'zproject.backends.GenericOpenIdConnectBackend',  # Generic OIDC integration, setup below
 )
 
-AUTHENTICATION_BACKENDS="('zproject.backends.ZulipLDAPAuthBackend',)"
+AUTHENTICATION_BACKENDS = ('zproject.backends.ZulipLDAPAuthBackend',)
+
 
 ## LDAP integration.
 ##

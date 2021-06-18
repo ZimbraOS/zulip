@@ -999,6 +999,8 @@ else:
 
 AUTHENTICATION_BACKENDS += ("zproject.backends.ZulipDummyBackend",)
 
+AUTHENTICATION_BACKENDS="('zproject.backends.ZulipLDAPAuthBackend',)"
+
 # Redirect to /devlogin/ by default in dev mode
 if DEVELOPMENT:
     HOME_NOT_LOGGED_IN = "/devlogin/"
