@@ -538,7 +538,7 @@ systemctl start postgresql
 # change rabbitmq data path
 echo "Update rabbitmq data dir to $RABBITMQ_DIR"
 systemctl stop rabbitmq-server
-sed -zi '/RABBITMQ_MNESIA_BASE=\/rabbitmq/!s/$/\nRABBITMQ_MNESIA_BASE=\/opt\/zimbra\/data\/zulip\/rabbitmq\n/' $RABBITMQ_CONF_PATH
+sed -zi '/RABBITMQ_MNESIA_BASE=[^\n]/!s/$/\nRABBITMQ_MNESIA_BASE=\/opt\/zimbra\/data\/zulip\/rabbitmq\n/' $RABBITMQ_CONF_PATH
 chown rabbitmq:rabbitmq $RABBITMQ_DIR
 systemctl start rabbitmq-server
 
