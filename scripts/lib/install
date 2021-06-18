@@ -529,7 +529,8 @@ ln -s $ZIMBRA_ZULIP_UPLOAD_DIR $ZULIP_UPLOAD_DIR
 
 # change postgres data path 
 echo "Update postgress data dir to $POSTGRESQL_DATA_DIR"
-sed -zi 's/data_directory =[^\n]*/data_directory = \x27\/opt\/zimbra\/data\/zulip\/postgresql\/13\/main\x27/g' $POSTGRESQL_CONF_PATH
+grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sed "s/^data_directory[[:blank:]]*=*[[:blank:]]*.*/data_directory = \x27\/opt\/zimbra\/data\/zulip\/postgresql\/13\/main\x27" -i $POSTGRESQL_CONF_PATH ||  sed "$ a\data_directory = \x27\/opt\/zimbra\/data\/zulip\/postgresql\/13\/main\x27" -i $POSTGRESQL_CONF_PATH
+
 systemctl stop postgresql
 chown postgres:postgres $POSTGRESQL_DATA_DIR
 rsync -av /var/lib/postgresql/$POSTGRESQL_VERSION $POSTGRESQL_DIR
@@ -538,7 +539,8 @@ systemctl start postgresql
 # change rabbitmq data path
 echo "Update rabbitmq data dir to $RABBITMQ_DIR"
 systemctl stop rabbitmq-server
-sed -zi '/RABBITMQ_MNESIA_BASE=[^\n]/!s/$/\nRABBITMQ_MNESIA_BASE=\/opt\/zimbra\/data\/zulip\/rabbitmq\n/' $RABBITMQ_CONF_PATH
+sudo grep -q "^RABBITMQ_MNESIA_BASE[[:blank:]]*=*[[:blank:]]*"  $RABBITMQ_CONF_PATH && sudo sed "s/^RABBITMQ_MNESIA_BASE[[:blank:]]*=*[[:blank:]]*.*/RABBITMQ_MNESIA_BASE = \/opt\/zimbra\/data\/zulip\/rabbitmq/" -i $RABBITMQ_CONF_PATH ||  sudo  sed "$ a\RABBITMQ_MNESIA_BASE = \/opt\/zimbra\/data\/zulip\/rabbitmq" -i $RABBITMQ_CONF_PATH
+
 chown rabbitmq:rabbitmq $RABBITMQ_DIR
 systemctl start rabbitmq-server
 
