@@ -541,7 +541,7 @@ systemctl start postgresql
 # change rabbitmq data path
 echo "Update rabbitmq data dir to $RABBITMQ_DIR"
 systemctl stop rabbitmq-server
-sudo grep -q "^RABBITMQ_MNESIA_BASE[[:blank:]]*=*[[:blank:]]*"  $RABBITMQ_CONF_PATH && sudo sed "s|^RABBITMQ_MNESIA_BASE=.*/RABBITMQ_MNESIA_BASE=$RABBITMQ_DIR" -i |$RABBITMQ_CONF_PATH| ||  sudo  sed "$ a|RABBITMQ_MNESIA_BASE=$RABBITMQ_DIR|" -i $RABBITMQ_CONF_PATH
+sudo grep -q "^RABBITMQ_MNESIA_BASE[[:blank:]]*=*[[:blank:]]*"  $RABBITMQ_CONF_PATH && sudo sed "s|^RABBITMQ_MNESIAq_BASE=.*|RABBITMQ_MNESIA_BASE=$RABBITMQ_DIR" -i $RABBITMQ_CONF_PATH| ||  sudo  sed "$ a|RABBITMQ_MNESIA_BASE=$RABBITMQ_DIR|" -i $RABBITMQ_CONF_PATH
 
 chown rabbitmq:rabbitmq $RABBITMQ_DIR
 systemctl start rabbitmq-server
