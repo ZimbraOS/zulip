@@ -549,7 +549,7 @@ systemctl start rabbitmq-server
 
 if [ ! -z $LDAP_SERVER ]; then 
 
-    sudo grep -q "^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_SERVER_URI = ldap:\/\/$LDAP_SERVER/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTH_LDAP_SERVER_URI = ldap:\/\/$LDAP_SERVER" -i /etc/zulip/settings.py
+    sudo grep -q "^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_SERVER_URI = \x27ldap:\/\/$LDAP_SERVER\x27/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTH_LDAP_SERVER_URI = \x27ldap:\/\/$LDAP_SERVER\x27" -i /etc/zulip/settings.py
 
     sudo grep -q "^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*"   /etc/zulip/zulip-secrets.conf  && sudo sed "s/^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*.*/auth_ldap_bind_password = $LDAP_PASSWORD/" -i  /etc/zulip/zulip-secrets.conf ||  sudo  sed "$ a\auth_ldap_bind_password = $LDAP_PASSWORD" -i  /etc/zulip/zulip-secrets.conf
 
