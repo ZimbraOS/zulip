@@ -555,7 +555,6 @@ if [ ! -z $LDAP_SERVER ]; then
 
 fi
 
-q
 if has_class "zulip::profile::rabbitmq"; then
     if ! rabbitmqctl status >/dev/null; then
         set +x
