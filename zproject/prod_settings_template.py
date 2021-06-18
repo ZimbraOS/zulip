@@ -137,17 +137,7 @@ EMAIL_GATEWAY_IMAP_FOLDER = "INBOX"
 ## The install process requires EmailAuthBackend (the default) to be
 ## enabled.  If you want to disable it, do so after creating the
 ## initial realm and user.
-AUTHENTICATION_BACKENDS: Tuple[str, ...] = (
-    "zproject.backends.EmailAuthBackend",  # Email and password; just requires SMTP setup
-    # 'zproject.backends.GoogleAuthBackend',  # Google auth, setup below
-    # 'zproject.backends.GitHubAuthBackend',  # GitHub auth, setup below
-    # 'zproject.backends.GitLabAuthBackend',  # GitLab auth, setup below
-    # 'zproject.backends.AzureADAuthBackend',  # Microsoft Azure Active Directory auth, setup below
-    # 'zproject.backends.AppleAuthBackend',  # Apple auth, setup below
-    # 'zproject.backends.SAMLAuthBackend', # SAML, setup below
-    # 'zproject.backends.ZulipLDAPAuthBackend',  # LDAP, setup below
-    # 'zproject.backends.ZulipRemoteUserBackend',  # Local SSO, setup docs on readthedocs
-)
+AUTHENTICATION_BACKENDS: Tuple[str, ...] = (    "zproject.backends.EmailAuthBackend"    )
 
 ## LDAP integration.
 ##
@@ -188,9 +178,7 @@ from django_auth_ldap.config import GroupOfNamesType, LDAPGroupQuery, LDAPSearch
 ## name they type into the Zulip login form.
 ##
 ## For more details and alternatives, see the documentation linked above.
-AUTH_LDAP_USER_SEARCH = LDAPSearch(
-    "ou=users,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
-)
+AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 ## Configuration to lookup a user's LDAP data given their email address
 ## (For Zulip reverse mapping).  If users log in as e.g. "sam" when

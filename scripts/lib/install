@@ -47,7 +47,7 @@ EOF
 
 # Shell option parsing.  Over time, we'll want to move some of the
 # environment variables below into this self-documenting system.
-args="$(getopt -o '' --long help,hostname:,email:,certbot,self-signed-cert,cacert:,postgresql-version:,postgresql-missing-dictionaries,no-init-db,no-overwrite-settings,no-dist-upgrade -n "$0" -- "$@")"
+args="$(getopt -o '' --long help,hostname:,email:,ldap-server:,ldap-password:,certbot,self-signed-cert,cacert:,postgresql-version:,postgresql-missing-dictionaries,no-init-db,no-overwrite-settings,no-dist-upgrade -n "$0" -- "$@")"
 eval "set -- $args"
 while true; do
     case "$1" in
@@ -106,9 +106,11 @@ while true; do
         --ldap-server)
             LDAP_SERVER="$2"
             shift
+            shift
             ;;
         --ldap-password)
             LDAP_PASSWORD="$2"
+            shift
             shift
             ;;
         --)
@@ -502,7 +504,7 @@ ZULIP_UPLOAD_DIR=/home/zulip/uploads
 ZIMBRA_ZULIP_UPLOAD_DIR=$DATA_DIR/uploads
 
 
-if [ ! -d "$DATA_DIR" ]; then
+if [ ! -d "$DATA_DIR" ]; then 
     echo "Create directory $DATA_DIR"
     mkdir -p "$DATA_DIR"
 fi
@@ -524,7 +526,7 @@ fi
 
 # change upload data path
 chown zulip:zulip $ZIMBRA_ZULIP_UPLOAD_DIR
-ln -s $ZIMBRA_ZULIP_UPLOAD_DIR $ZULIP_UPLOAD_DIR
+ln -nsf $ZIMBRA_ZULIP_UPLOAD_DIR $ZULIP_UPLOAD_DIR
 
 
 # change postgres data path 
@@ -546,7 +548,7 @@ systemctl start rabbitmq-server
 
 
 if [ ! -z $LDAP_SERVER ]; then 
-    AUTHENTICATION_BACKENDS="\(\'zproject.backends.ZulipLDAPAuthBackend\'\,\)"
+    AUTHENTICATION_BACKENDS="('zproject.backends.ZulipLDAPAuthBackend',)"
     ALLOWED_HOSTS=['*']
     AUTH_LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
     AUTH_LDAP_REVERSE_EMAIL_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(email)s)")'
