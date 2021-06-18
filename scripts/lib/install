@@ -548,35 +548,11 @@ systemctl start rabbitmq-server
 
 
 if [ ! -z $LDAP_SERVER ]; then 
-    AUTHENTICATION_BACKENDS="('zproject.backends.ZulipLDAPAuthBackend',)"
-    ALLOWED_HOSTS=['*']
-    AUTH_LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
-    AUTH_LDAP_REVERSE_EMAIL_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(email)s)")'
-    AUTH_LDAP_USERNAME_ATTR='mail'
-    AUTH_LDAP_USER_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(user)s)")'
-    ZIMBRA_JWT_AUTH_KEY='MOVE_ME_TO_A_SECRET'
 
     sudo grep -q "^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_SERVER_URI = ldap:\/\/$LDAP_SERVER/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTH_LDAP_SERVER_URI = ldap:\/\/$LDAP_SERVER" -i /etc/zulip/settings.py
 
     sudo grep -q "^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*"   /etc/zulip/zulip-secrets.conf  && sudo sed "s/^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*.*/auth_ldap_bind_password = $LDAP_PASSWORD/" -i  /etc/zulip/zulip-secrets.conf ||  sudo  sed "$ a\auth_ldap_bind_password = $LDAP_PASSWORD" -i  /etc/zulip/zulip-secrets.conf
 
-
-    sudo grep -q "^AUTHENTICATION_BACKENDS[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTHENTICATION_BACKENDS[[:blank:]]*=*[[:blank:]]*.*/AUTHENTICATION_BACKENDS = $AUTHENTICATION_BACKENDS/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTHENTICATION_BACKENDS = $AUTHENTICATION_BACKENDS" -i /etc/zulip/settings.py
-
-
-    sudo grep -q "^ALLOWED_HOSTS[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^ALLOWED_HOSTS[[:blank:]]*=*[[:blank:]]*.*/ALLOWED_HOSTS = $ALLOWED_HOSTS/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\ALLOWED_HOSTS = $ALLOWED_HOSTS" -i /etc/zulip/settings.py
-
-
-    sudo grep -q "^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_BIND_DN = $AUTH_LDAP_BIND_DN/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTH_LDAP_BIND_DN = $AUTH_LDAP_BIND_DN" -i /etc/zulip/settings.py
-
-
-    sudo grep -q "^AUTH_LDAP_REVERSE_EMAIL_SEARCH[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTH_LDAP_REVERSE_EMAIL_SEARCH[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_REVERSE_EMAIL_SEARCH = $AUTH_LDAP_REVERSE_EMAIL_SEARCH/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTH_LDAP_REVERSE_EMAIL_SEARCH = $AUTH_LDAP_REVERSE_EMAIL_SEARCH" -i /etc/zulip/settings.py
-
-    sudo grep -q "^AUTH_LDAP_USERNAME_ATTR[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTH_LDAP_USERNAME_ATTR[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_USERNAME_ATTR = $AUTH_LDAP_USERNAME_ATTR/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTH_LDAP_USERNAME_ATTR = $AUTH_LDAP_USERNAME_ATTR" -i /etc/zulip/settings.py
-
-    sudo grep -q "^AUTH_LDAP_USER_SEARCH[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTH_LDAP_USER_SEARCH[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_USER_SEARCH = $AUTH_LDAP_USER_SEARCH/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTH_LDAP_USER_SEARCH = $AUTH_LDAP_USER_SEARCH" -i /etc/zulip/settings.py
-
-    sudo grep -q "^ZIMBRA_JWT_AUTH_KEY[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^ZIMBRA_JWT_AUTH_KEY[[:blank:]]*=*[[:blank:]]*.*/ZIMBRA_JWT_AUTH_KEY = $ZIMBRA_JWT_AUTH_KEY/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\ZIMBRA_JWT_AUTH_KEY = $ZIMBRA_JWT_AUTH_KEY" -i /etc/zulip/settings.py
 fi
 
 

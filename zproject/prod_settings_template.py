@@ -50,6 +50,8 @@ EXTERNAL_HOST = "zulip.example.com"
 ##
 ## Note that these should just be hostnames, without port numbers.
 # ALLOWED_HOSTS = ['zulip-alias.example.com', '192.0.2.1']
+ALLOWED_HOSTS=['*']
+
 
 ## If EXTERNAL_HOST is not a valid domain name (e.g. an IP address),
 ## set FAKE_EMAIL_DOMAIN below to a domain that Zulip can use when
@@ -137,7 +139,20 @@ EMAIL_GATEWAY_IMAP_FOLDER = "INBOX"
 ## The install process requires EmailAuthBackend (the default) to be
 ## enabled.  If you want to disable it, do so after creating the
 ## initial realm and user.
-AUTHENTICATION_BACKENDS: Tuple[str, ...] = (    "zproject.backends.EmailAuthBackend"    )
+AUTHENTICATION_BACKENDS: Tuple[str, ...] = (
+    "zproject.backends.EmailAuthBackend",  # Email and password; just requires SMTP setup
+    # 'zproject.backends.GoogleAuthBackend',  # Google auth, setup below
+    # 'zproject.backends.GitHubAuthBackend',  # GitHub auth, setup below
+    # 'zproject.backends.GitLabAuthBackend',  # GitLab aquth, setup below
+    # 'zproject.backends.AzureADAuthBackend',  # Microsoft Azure Active Directory auth, setup below
+    # 'zproject.backends.AppleAuthBackend',  # Apple auth, setup below
+    # 'zproject.backends.SAMLAuthBackend', # SAML, setup below
+    # 'zproject.backends.ZulipLDAPAuthBackend',  # LDAP, setup below
+    # 'zproject.backends.ZulipRemoteUserBackend',  # Local SSO, setup docs on readthedocs
+    # 'zproject.backends.GenericOpenIdConnectBackend',  # Generic OIDC integration, setup below
+)
+
+AUTHENTICATION_BACKENDS="('zproject.backends.ZulipLDAPAuthBackend',)"
 
 ## LDAP integration.
 ##
@@ -159,6 +174,7 @@ from django_auth_ldap.config import GroupOfNamesType, LDAPGroupQuery, LDAPSearch
 ## The DN of the user to bind as (i.e., authenticate as) in order to
 ## query LDAP.  If unset, Zulip does an anonymous bind.
 # AUTH_LDAP_BIND_DN = ""
+AUTH_LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
 
 ## Passwords and secrets are not stored in this file.  The password
 ## corresponding to AUTH_LDAP_BIND_DN goes in `/etc/zulip/zulip-secrets.conf`.
@@ -178,7 +194,9 @@ from django_auth_ldap.config import GroupOfNamesType, LDAPGroupQuery, LDAPSearch
 ## name they type into the Zulip login form.
 ##
 ## For more details and alternatives, see the documentation linked above.
-AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    "ou=users,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
+)
 
 ## Configuration to lookup a user's LDAP data given their email address
 ## (For Zulip reverse mapping).  If users log in as e.g. "sam" when
@@ -199,9 +217,16 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=com", ldap.SCOPE_SUBT
 # AUTH_LDAP_REVERSE_EMAIL_SEARCH = LDAPSearch("ou=users,dc=example,dc=com",
 #                                             ldap.SCOPE_SUBTREE, "(email=%(email)s)")
 
+AUTH_LDAP_REVERSE_EMAIL_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(email)s)")'
+
 ## AUTH_LDAP_USERNAME_ATTR should be the Zulip username attribute
 ## (defined in AUTH_LDAP_USER_SEARCH).
+AUTH_LDAP_USER_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(user)s)")'
 # AUTH_LDAP_USERNAME_ATTR = "uid"
+
+AUTH_LDAP_USERNAME_ATTR='mail'
+
+ZIMBRA_JWT_AUTH_KEY='MOVE_ME_TO_A_SECRET'
 
 ## This map defines how to populate attributes of a Zulip user from LDAP.
 ##
