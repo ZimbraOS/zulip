@@ -152,8 +152,6 @@ AUTHENTICATION_BACKENDS: Tuple[str, ...] = (
     # 'zproject.backends.GenericOpenIdConnectBackend',  # Generic OIDC integration, setup below
 )
 
-AUTHENTICATION_BACKENDS = ('zproject.backends.ZulipLDAPAuthBackend',)
-
 
 ## LDAP integration.
 ##
@@ -175,7 +173,6 @@ from django_auth_ldap.config import GroupOfNamesType, LDAPGroupQuery, LDAPSearch
 ## The DN of the user to bind as (i.e., authenticate as) in order to
 ## query LDAP.  If unset, Zulip does an anonymous bind.
 # AUTH_LDAP_BIND_DN = ""
-AUTH_LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
 
 ## Passwords and secrets are not stored in this file.  The password
 ## corresponding to AUTH_LDAP_BIND_DN goes in `/etc/zulip/zulip-secrets.conf`.
@@ -195,9 +192,7 @@ AUTH_LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
 ## name they type into the Zulip login form.
 ##
 ## For more details and alternatives, see the documentation linked above.
-AUTH_LDAP_USER_SEARCH = LDAPSearch(
-    "ou=users,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
-)
+AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 
 ## Configuration to lookup a user's LDAP data given their email address
 ## (For Zulip reverse mapping).  If users log in as e.g. "sam" when
@@ -218,16 +213,10 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch(
 # AUTH_LDAP_REVERSE_EMAIL_SEARCH = LDAPSearch("ou=users,dc=example,dc=com",
 #                                             ldap.SCOPE_SUBTREE, "(email=%(email)s)")
 
-AUTH_LDAP_REVERSE_EMAIL_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(email)s)")'
 
 ## AUTH_LDAP_USERNAME_ATTR should be the Zulip username attribute
 ## (defined in AUTH_LDAP_USER_SEARCH).
-AUTH_LDAP_USER_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(user)s)")'
 # AUTH_LDAP_USERNAME_ATTR = "uid"
-
-AUTH_LDAP_USERNAME_ATTR='mail'
-
-ZIMBRA_JWT_AUTH_KEY='MOVE_ME_TO_A_SECRET'
 
 ## This map defines how to populate attributes of a Zulip user from LDAP.
 ##
