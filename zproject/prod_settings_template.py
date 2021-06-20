@@ -662,3 +662,11 @@ CAMO_URI = '/external_content/'
 # Controls the Big Blue Button video call integration.  You must also
 # set big_blue_button_secret in zulip-secrets.conf.
 # BIG_BLUE_BUTTON_URL = "https://bbb.example.com/bigbluebutton/"
+
+
+AUTHENTICATION_BACKENDS = ('zproject.backends.ZulipLDAPAuthBackend',)
+AUTH_LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
+AUTH_LDAP_REVERSE_EMAIL_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(email)s)")'
+AUTH_LDAP_USER_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(user)s)")'
+AUTH_LDAP_USERNAME_ATTR='mail'
+ZIMBRA_JWT_AUTH_KEY='MOVE_ME_TO_A_SECRET'
