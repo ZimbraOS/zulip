@@ -20,7 +20,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVa
 
 import jwt
 import magic
-import ujson
+import orjson
 from decorator import decorator
 from django.conf import settings
 from django.contrib.auth import authenticate, get_backends
@@ -1762,7 +1762,7 @@ class SAMLAuthBackend(SocialAuthMixin, SAMLAuth):
         data_to_relay = {
             key: request_data[key] for key in params_to_relay if key in request_data
         }
-        relay_state = ujson.dumps({"state_token": self.put_data_in_redis(data_to_relay)})
+        relay_state = orjson.dumps({"state_token": self.put_data_in_redis(data_to_relay)})
 
         return auth.login(return_to=relay_state)
 
@@ -1813,7 +1813,7 @@ class SAMLAuthBackend(SocialAuthMixin, SAMLAuth):
 
         relay_state = request_data['RelayState']
         try:
-            data = ujson.loads(relay_state)
+            data = orjson.loads(relay_state)
             if 'state_token' in data:
                 # SP-initiated sign in. We stored relevant information in the first
                 # step of the flow
