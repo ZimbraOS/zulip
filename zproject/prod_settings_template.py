@@ -152,10 +152,6 @@ AUTHENTICATION_BACKENDS: Tuple[str, ...] = (
     # 'zproject.backends.GenericOpenIdConnectBackend',  # Generic OIDC integration, setup below
 )
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 888e6b2824f0ec9a4795f9885496f12d0db19c2c
 ## LDAP integration.
 ##
 ## Zulip supports retrieving information about users via LDAP, and
@@ -195,7 +191,9 @@ from django_auth_ldap.config import GroupOfNamesType, LDAPGroupQuery, LDAPSearch
 ## name they type into the Zulip login form.
 ##
 ## For more details and alternatives, see the documentation linked above.
-AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    "ou=users,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
+)
 
 ## Configuration to lookup a user's LDAP data given their email address
 ## (For Zulip reverse mapping).  If users log in as e.g. "sam" when
@@ -216,10 +214,6 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=example,dc=com", ldap.SCOPE_SUBT
 # AUTH_LDAP_REVERSE_EMAIL_SEARCH = LDAPSearch("ou=users,dc=example,dc=com",
 #                                             ldap.SCOPE_SUBTREE, "(email=%(email)s)")
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 888e6b2824f0ec9a4795f9885496f12d0db19c2c
 ## AUTH_LDAP_USERNAME_ATTR should be the Zulip username attribute
 ## (defined in AUTH_LDAP_USER_SEARCH).
 # AUTH_LDAP_USERNAME_ATTR = "uid"
