@@ -49,9 +49,18 @@ git archive -o "$TARBALL" "--prefix=$prefix/" HEAD
 
 cd "$TMPDIR"
 tar -xf "$TARBALL"
+
+while read -r i; do
+    cp "${TMPDIR:?}/$prefix/zimbra/$i" "${TMPDIR:?}/$prefix/$i"
+done <"$TMPDIR/$prefix/tools/zimbra-tarball-include.txt"
+
 while read -r i; do
     rm -r --interactive=never "${TMPDIR:?}/$prefix/$i"
 done <"$TMPDIR/$prefix/tools/release-tarball-exclude.txt"
+
+
+
+
 tar -cf "$TARBALL" "$prefix"
 rm -rf "$prefix"
 
