@@ -1,5 +1,7 @@
 from typing import Any, Dict, Tuple
 
+from .config import get_secret
+
 ################################################################
 ## Zulip Server settings.
 ##
@@ -50,8 +52,6 @@ EXTERNAL_HOST = "zulip.example.com"
 ##
 ## Note that these should just be hostnames, without port numbers.
 # ALLOWED_HOSTS = ['zulip-alias.example.com', '192.0.2.1']
-ALLOWED_HOSTS=['*']
-
 
 ## If EXTERNAL_HOST is not a valid domain name (e.g. an IP address),
 ## set FAKE_EMAIL_DOMAIN below to a domain that Zulip can use when
@@ -143,7 +143,7 @@ AUTHENTICATION_BACKENDS: Tuple[str, ...] = (
     "zproject.backends.EmailAuthBackend",  # Email and password; just requires SMTP setup
     # 'zproject.backends.GoogleAuthBackend',  # Google auth, setup below
     # 'zproject.backends.GitHubAuthBackend',  # GitHub auth, setup below
-    # 'zproject.backends.GitLabAuthBackend',  # GitLab aquth, setup below
+    # 'zproject.backends.GitLabAuthBackend',  # GitLab auth, setup below
     # 'zproject.backends.AzureADAuthBackend',  # Microsoft Azure Active Directory auth, setup below
     # 'zproject.backends.AppleAuthBackend',  # Apple auth, setup below
     # 'zproject.backends.SAMLAuthBackend', # SAML, setup below
@@ -151,9 +151,6 @@ AUTHENTICATION_BACKENDS: Tuple[str, ...] = (
     # 'zproject.backends.ZulipRemoteUserBackend',  # Local SSO, setup docs on readthedocs
     # 'zproject.backends.GenericOpenIdConnectBackend',  # Generic OIDC integration, setup below
 )
-
-AUTHENTICATION_BACKENDS = ('zproject.backends.ZulipLDAPAuthBackend',)
-
 
 ## LDAP integration.
 ##
@@ -175,7 +172,6 @@ from django_auth_ldap.config import GroupOfNamesType, LDAPGroupQuery, LDAPSearch
 ## The DN of the user to bind as (i.e., authenticate as) in order to
 ## query LDAP.  If unset, Zulip does an anonymous bind.
 # AUTH_LDAP_BIND_DN = ""
-AUTH_LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
 
 ## Passwords and secrets are not stored in this file.  The password
 ## corresponding to AUTH_LDAP_BIND_DN goes in `/etc/zulip/zulip-secrets.conf`.
@@ -218,16 +214,9 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch(
 # AUTH_LDAP_REVERSE_EMAIL_SEARCH = LDAPSearch("ou=users,dc=example,dc=com",
 #                                             ldap.SCOPE_SUBTREE, "(email=%(email)s)")
 
-AUTH_LDAP_REVERSE_EMAIL_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(email)s)")'
-
 ## AUTH_LDAP_USERNAME_ATTR should be the Zulip username attribute
 ## (defined in AUTH_LDAP_USER_SEARCH).
-AUTH_LDAP_USER_SEARCH='LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(user)s)")'
 # AUTH_LDAP_USERNAME_ATTR = "uid"
-
-AUTH_LDAP_USERNAME_ATTR='mail'
-
-ZIMBRA_JWT_AUTH_KEY='MOVE_ME_TO_A_SECRET'
 
 ## This map defines how to populate attributes of a Zulip user from LDAP.
 ##
@@ -355,6 +344,40 @@ AUTH_LDAP_USER_ATTR_MAP = {
 # SOCIAL_AUTH_SUBDOMAIN = 'auth'
 
 ########
+## Generic OpenID Connect (OIDC).  See also documentation here:
+##
+##     https://zulip.readthedocs.io/en/latest/production/authentication-methods.html#openid-connect
+##
+
+SOCIAL_AUTH_OIDC_ENABLED_IDPS = {
+    ## This field (example: "idp_name") may appear in URLs during
+    ## authentication, but is otherwise not user-visible.
+    "idp_name": {
+        ## The base path to the provider's OIDC API. Zulip fetches the
+        ## IdP's configuration from the discovery endpoint, which will be
+        ## "{oidc_url}/.well-known/openid-configuration".
+        "oidc_url": "https://example.com/api/openid",
+        ## The display name, used for "Log in with <display name>" buttons.
+        "display_name": "Example",
+        ## Optional: URL of an icon to decorate "Log in with <display name>" buttons.
+        "display_icon": None,
+        ## The client_id and secret provided by your OIDC IdP. To keep
+        ## settings.py free of secrets, the get_secret call below
+        ## reads the secret with the specified name from zulip-secrets.conf.
+        "client_id": "<your client id>",
+        "secret": get_secret("social_auth_oidc_secret"),
+    }
+}
+
+## Controls how Zulip uses the Full Name provided by the IdP at the
+## userinfo endpoint. By default, Zulip prefills that value but lets
+## the user modify it in the registration form. When enabled, Zulip
+## assumes the name is correct, and new users will not be presented
+## with a registration form unless they need to accept Terms of
+## Service (i.e. TERMS_OF_SERVICE=True).
+# SOCIAL_AUTH_OIDC_FULL_NAME_VALIDATED = True
+
+########
 ## SAML authentication
 ##
 ## For SAML authentication, you will need to configure the settings
@@ -371,7 +394,7 @@ SOCIAL_AUTH_SAML_ORG_INFO = {
         "url": "{}{}".format("https://", EXTERNAL_HOST),
     },
 }
-SOCIAL_AUTH_SAML_ENABLED_IDPS = {
+SOCIAL_AUTH_SAML_ENABLED_IDPS: Dict[str, Any] = {
     ## The fields are explained in detail here:
     ##     https://python-social-auth.readthedocs.io/en/latest/backends/saml.html
     "idp_name": {
@@ -390,6 +413,10 @@ SOCIAL_AUTH_SAML_ENABLED_IDPS = {
         "attr_last_name": "last_name",
         "attr_username": "email",
         "attr_email": "email",
+        ## List of additional attributes to fetch from the SAMLResponse.
+        ## These attributes will be available for synchronizing custom profile fields.
+        ## in SOCIAL_AUTH_SYNC_CUSTOM_ATTRS_DICT.
+        # "extra_attrs": ["title", "mobilePhone"],
         ##
         ## The "x509cert" attribute is automatically read from
         ## /etc/zulip/saml/idps/{idp_name}.crt; don't specify it here.
@@ -431,6 +458,16 @@ SOCIAL_AUTH_SAML_SUPPORT_CONTACT = {
     "givenName": "Support team",
     "emailAddress": ZULIP_ADMINISTRATOR,
 }
+
+# SOCIAL_AUTH_SYNC_CUSTOM_ATTRS_DICT = {
+#    "example_org": {
+#        "saml": {
+#            # Format: "<custom profile field name>": "<attribute name from extra_attrs above>"
+#            "title": "title",
+#            "phone_number": "mobilePhone",
+#        }
+#    }
+# }
 
 ########
 ## Apple authentication ("Sign in with Apple").
