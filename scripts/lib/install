@@ -546,6 +546,10 @@ sudo grep -q "^RABBITMQ_MNESIA_BASE="  $RABBITMQ_CONF_PATH && sudo sed "s|^RABBI
 chown rabbitmq:rabbitmq $RABBITMQ_DIR
 systemctl start rabbitmq-server
 
+# generate ZIMBRA_JWT_AUTH_KEY
+sudo grep -q "^ZIMBRA_JWT_AUTH_KEY[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py \
+    || (JWT_AUTH_KEY=$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32);  sudo sed "$ a\ZIMBRA_JWT_AUTH_KEY = \x27$JWT_AUTH_KEY\x27\n" -i /etc/zulip/settings.py)
+
 
 if [ ! -z $LDAP_SERVER ]; then 
 

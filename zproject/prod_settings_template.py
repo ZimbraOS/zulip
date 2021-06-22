@@ -699,5 +699,3 @@ AUTH_LDAP_BIND_DN = 'uid=zimbra,cn=admins,cn=zimbra'
 AUTH_LDAP_REVERSE_EMAIL_SEARCH = LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(email)s)")
 AUTH_LDAP_USER_SEARCH = LDAPSearch("", ldap.SCOPE_SUBTREE, "(mail=%(user)s)")
 AUTH_LDAP_USERNAME_ATTR = 'mail'
-ZIMBRA_JWT_AUTH_KEY = 'MOVE_ME_TO_A_SECRET'
-
