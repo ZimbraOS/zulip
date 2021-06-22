@@ -97,17 +97,17 @@ def install_venv_deps(pip: str, requirements_file: str, is_provision: bool) -> N
             ]
         )
     else:
-        list_wheel_1 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/1")
-        list_wheel_2 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/2")
-        list_wheel_3  = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/3")
+        list_wheel_1 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/20/1")
+        list_wheel_2 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/20/2")
+        list_wheel_3  = os.listdir(ZULIP_PATH+"/packages/Ubuntu/20/3")
         for i in list_wheel_1:
-            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/1/"+i])
+            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/20/1/"+i])
 
         for j in list_wheel_2:
-            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/2/"+j])
+            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/20/2/"+j])
 
         for k in list_wheel_3:
-            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/3/"+k])
+            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/20/3/"+k])
 
 
 
