@@ -81,31 +81,34 @@ def get_venv_dependencies(vendor: str, os_version: str) -> List[str]:
         raise AssertionError("Invalid vendor")
 
 
-def install_venv_deps(pip: str, requirements_file: str) -> None:
-    list_wheel_1 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/1")
-    list_wheel_2 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/2")
-    list_wheel_3  = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/3")
-    for i in list_wheel_1:
-        run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/1/"+i])
+def install_venv_deps(pip: str, requirements_file: str, is_provision: bool) -> None:
+    if is_provision:
+        pip_requirements = os.path.join(ZULIP_PATH, "requirements", "pip.txt")
+        run([pip, "install", "--force-reinstall", "--require-hashes", "-r", pip_requirements])
+        run(
+            [
+                pip,
+                "install",
+                "--use-deprecated=legacy-resolver",  # https://github.com/pypa/pip/issues/5780
+                "--no-deps",
+                "--require-hashes",
+                "-r",
+                requirements_file,
+            ]
+        )
+    else:
+        list_wheel_1 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/1")
+        list_wheel_2 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/2")
+        list_wheel_3  = os.listdir(ZULIP_PATH+"/packages/Ubuntu/18/3")
+        for i in list_wheel_1:
+            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/1/"+i])
 
-    for j in list_wheel_2:
-        run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/2/"+j])
+        for j in list_wheel_2:
+            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/2/"+j])
 
-    for k in list_wheel_3:
-        run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/3/"+k])
-'''     pip_requirements = os.path.join(ZULIP_PATH, "requirements", "pip.txt")
-    run([pip, "install", "--force-reinstall", "--require-hashes", "-r", pip_requirements])
-    run(
-        [
-            pip,
-            "install",
-            "--use-deprecated=legacy-resolver",  # https://github.com/pypa/pip/issues/5780
-            "--no-deps",
-            "--require-hashes",
-            "-r",
-            requirements_file,
-        ]
-    ) '''
+        for k in list_wheel_3:
+            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/18/3/"+k])
+
 
 
 def get_index_filename(venv_path: str) -> str:
@@ -301,6 +304,7 @@ def setup_virtualenv(
     target_venv_path: Optional[str],
     requirements_file: str,
     patch_activate_script: bool = False,
+    is_provision: bool = False
 ) -> str:
 
     sha1sum = generate_hash(requirements_file)
@@ -313,7 +317,7 @@ def setup_virtualenv(
         )
     success_stamp = os.path.join(cached_venv_path, "success-stamp")
     if not os.path.exists(success_stamp):
-        do_setup_virtualenv(cached_venv_path, requirements_file)
+        do_setup_virtualenv(cached_venv_path, requirements_file, is_provision)
         with open(success_stamp, "w") as f:
             f.close()
 
@@ -332,7 +336,7 @@ def add_cert_to_pipconf() -> None:
     run(["crudini", "--set", conffile, "global", "cert", os.environ["CUSTOM_CA_CERTIFICATES"]])
 
 
-def do_setup_virtualenv(venv_path: str, requirements_file: str) -> None:
+def do_setup_virtualenv(venv_path: str, requirements_file: str, is_provision: bool) -> None:
 
     # Setup Python virtualenv
     new_packages = set(get_package_names(requirements_file))
@@ -355,12 +359,12 @@ def do_setup_virtualenv(venv_path: str, requirements_file: str) -> None:
         add_cert_to_pipconf()
 
     try:
-        install_venv_deps(pip, requirements_file)
+        install_venv_deps(pip, requirements_file, is_provision)
     except subprocess.CalledProcessError:
         try:
             # Might be a failure due to network connection issues. Retrying...
             print(WARNING + "`pip install` failed; retrying..." + ENDC)
-            install_venv_deps(pip, requirements_file)
+            install_venv_deps(pip, requirements_file, is_provision)
         except BaseException as e:
             # Suppress exception chaining
             raise e from None
