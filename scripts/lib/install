@@ -47,7 +47,7 @@ EOF
 
 # Shell option parsing.  Over time, we'll want to move some of the
 # environment variables below into this self-documenting system.
-args="$(getopt -o '' --long help,hostname:,email:,ldap-server:,ldap-password:,certbot,self-signed-cert,cacert:,postgresql-version:,postgresql-missing-dictionaries,no-init-db,no-overwrite-settings,no-dist-upgrade -n "$0" -- "$@")"
+args="$(getopt -o '' --long help,hostname:,email:,ldap-server:,ldap-password:,ldap-bind-dn:,certbot,self-signed-cert,cacert:,postgresql-version:,postgresql-missing-dictionaries,no-init-db,no-overwrite-settings,no-dist-upgrade -n "$0" -- "$@")"
 eval "set -- $args"
 while true; do
     case "$1" in
@@ -110,6 +110,11 @@ while true; do
             ;;
         --ldap-password)
             LDAP_PASSWORD="$2"
+            shift
+            shift
+            ;;
+        --ldap-bind-dn)
+            LDAP_BIND_DN="$2"
             shift
             shift
             ;;
@@ -553,10 +558,19 @@ sudo grep -q "^ZIMBRA_JWT_AUTH_KEY[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settin
 
 if [ ! -z $LDAP_SERVER ]; then 
 
-    sudo grep -q "^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py  && sudo sed "s/^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_SERVER_URI = \x27ldap:\/\/$LDAP_SERVER\x27/" -i /etc/zulip/settings.py ||  sudo  sed "$ a\AUTH_LDAP_SERVER_URI = \x27ldap:\/\/$LDAP_SERVER\x27" -i /etc/zulip/settings.py
+    sudo grep -q "^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*" /etc/zulip/settings.py \
+        && sudo sed "s/^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_SERVER_URI = \x27ldap:\/\/$LDAP_SERVER\x27/" -i /etc/zulip/settings.py \
+        || sudo  sed "$ a\AUTH_LDAP_SERVER_URI = \x27ldap:\/\/$LDAP_SERVER\x27" -i /etc/zulip/settings.py
 
-    sudo grep -q "^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*"   /etc/zulip/zulip-secrets.conf  && sudo sed "s/^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*.*/auth_ldap_bind_password = $LDAP_PASSWORD/" -i  /etc/zulip/zulip-secrets.conf ||  sudo  sed "$ a\auth_ldap_bind_password = $LDAP_PASSWORD" -i  /etc/zulip/zulip-secrets.conf
+    sudo grep -q "^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*" /etc/zulip/zulip-secrets.conf \
+        && sudo sed "s/^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*.*/auth_ldap_bind_password = $LDAP_PASSWORD/" -i  /etc/zulip/zulip-secrets.conf \
+        || sudo  sed "$ a\auth_ldap_bind_password = $LDAP_PASSWORD" -i  /etc/zulip/zulip-secrets.conf
 
+    if [ ! -z $LDAP_BIND_DN ]; then
+        sudo grep -q "^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*" /etc/zulip/settings.py \
+        && sudo sed "s/^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_BIND_DN = \x27$LDAP_BIND_DN\x27/" -i /etc/zulip/settings.py \
+        || sudo  sed "$ a\AUTH_LDAP_BIND_DN = \x27$LDAP_BIND_DN\x27" -i /etc/zulip/settings.py
+    fi
 fi
 
 if has_class "zulip::profile::rabbitmq"; then
