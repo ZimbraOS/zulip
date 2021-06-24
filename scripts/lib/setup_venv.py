@@ -5,7 +5,7 @@ import subprocess
 from typing import List, Optional, Set, Tuple
 
 from scripts.lib.hash_reqs import expand_reqs, python_version
-from scripts.lib.zulip_tools import ENDC, WARNING, os_families, run, run_as_root
+from scripts.lib.zulip_tools import ENDC, WARNING, os_families, run, run_as_root, parse_os_release
 
 ZULIP_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 VENV_CACHE_PATH = "/srv/zulip-venv-cache"
@@ -97,17 +97,31 @@ def install_venv_deps(pip: str, requirements_file: str, is_provision: bool) -> N
             ]
         )
     else:
-        list_wheel_1 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/20/1")
-        list_wheel_2 = os.listdir(ZULIP_PATH+"/packages/Ubuntu/20/2")
-        list_wheel_3  = os.listdir(ZULIP_PATH+"/packages/Ubuntu/20/3")
+
+        distro_info = parse_os_release()
+        vendor = distro_info["ID"]
+        os_version = distro_info["VERSION_ID"]
+        
+        if vendor == "ubuntu" and "20" in os_version:
+            PACKAGE_DIR='20'
+        else:
+            PACKAGE_DIR='18'
+
+        DEPS_ONE_DIR = ZULIP_PATH+"/packages/Ubuntu/"+PACKAGE_DIR+"/1"
+        DEPS_TWO_DIR = ZULIP_PATH+"/packages/Ubuntu/"+PACKAGE_DIR+"/2"
+        DEPS_THREE_DIR = ZULIP_PATH+"/packages/Ubuntu/"+PACKAGE_DIR+"/3"
+
+        list_wheel_1 = os.listdir(DEPS_ONE_DIR)
+        list_wheel_2 = os.listdir(DEPS_TWO_DIR)
+        list_wheel_3  = os.listdir(DEPS_THREE_DIR)
         for i in list_wheel_1:
-            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/20/1/"+i])
+            run([pip, "install", DEPS_THREE_DIR+i])
 
         for j in list_wheel_2:
-            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/20/2/"+j])
+            run([pip, "install", DEPS_TWO_DIR+j])
 
         for k in list_wheel_3:
-            run([pip, "install", ZULIP_PATH+"/packages/Ubuntu/20/3/"+k])
+            run([pip, "install", DEPS_THREE_DIR+k])
 
 
 
