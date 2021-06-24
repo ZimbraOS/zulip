@@ -115,7 +115,7 @@ def install_venv_deps(pip: str, requirements_file: str, is_provision: bool) -> N
         list_wheel_2 = os.listdir(DEPS_TWO_DIR)
         list_wheel_3  = os.listdir(DEPS_THREE_DIR)
         for i in list_wheel_1:
-            run([pip, "install", DEPS_THREE_DIR+"/"+i])
+            run([pip, "install", DEPS_ONE_DIR+"/"+i])
 
         for j in list_wheel_2:
             run([pip, "install", DEPS_TWO_DIR+"/"+j])
