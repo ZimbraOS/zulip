@@ -130,6 +130,75 @@ if [ "$#" -gt 0 ]; then
     exit 1
 fi
 
+if [[ "$ZULIP_ADMINISTRATOR"  == "" ]]; then
+    while true; do
+        echo -n "Please enter an email for administrator: "
+        read ZULIP_ADMINISTRATOR
+        if [[ "$ZULIP_ADMINISTRATOR"  != "" ]]; then
+            break
+        fi
+    done 
+fi
+
+if [[ "$EXTERNAL_HOST"  == "" ]]; then
+    while true; do
+        echo -n "Please enter a host url: "
+        read EXTERNAL_HOST
+        if [[ "$EXTERNAL_HOST"  != "" ]]; then
+            break
+        fi
+    done 
+fi
+
+echo -n "Do you want to use certbot [yes/no] (default - yes): "
+read USE_CERTBOT_INPUT
+if [ "$USE_CERTBOT_INPUT"  == "" ] || [ "$USE_CERTBOT_INPUT"  == "yes" ]; then
+    USE_CERTBOT=1
+elif [[ "$USE_CERTBOT_INPUT"  == "no" ]]; then
+    echo -n "Do you want to use self signed cert [yes/no] (default - yes): "
+    read SELF_SIGNED_CERT_INPUT
+    if [ "$SELF_SIGNED_CERT_INPUT"  == "" ] || [ "$SELF_SIGNED_CERT_INPUT"  == "yes" ]; then
+        SELF_SIGNED_CERT=1
+    fi
+fi
+
+echo -n "Please enter LDAP protocol [ldap/ldaps] (default - ldap): "
+read LDAP_PROTOCOL
+if [[ "$LDAP_PROTOCOL"  == "ldaps" ]]; then
+    LDAP_PROTOCOL='ldaps'
+    echo "Note: You have to add ca cert inside ldap configuration file manually and restart zulip once installation completes."
+elif [ "$LDAP_PROTOCOL"  == "" ] || [ "$LDAP_PROTOCOL"  != "ldap" ]; then
+    LDAP_PROTOCOL='ldap'
+fi
+
+while true; do
+    echo -n "Please enter LDAP url: "
+    read LDAP_SERVER
+    if [[ "$LDAP_SERVER"  != "" ]]; then
+        break
+    fi
+done
+
+echo -n "Please enter LDAP port (default - 389): "
+read LDAP_SERVER_PORT
+if [[ "$LDAP_SERVER_PORT"  == "" ]]; then
+    LDAP_SERVER_PORT=389
+fi
+
+while true; do
+    echo -n "Please enter LDAP password: "
+    read LDAP_PASSWORD
+    if [[ "$LDAP_PASSWORD"  != "" ]]; then
+        break
+    fi
+done 
+
+echo -n "Please enter LDAP bind dn (default - uid=zimbra,cn=admins,cn=zimbra): "
+read LDAP_BIND_DN
+if [[ "$LDAP_BIND_DN"  == "" ]]; then
+    LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
+fi
+
 ## Options from environment variables.
 #
 # Specify options for apt.
@@ -556,21 +625,29 @@ sudo grep -q "^ZIMBRA_JWT_AUTH_KEY[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settin
     || (JWT_AUTH_KEY=$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32);  sudo sed "$ a\ZIMBRA_JWT_AUTH_KEY = \x27$JWT_AUTH_KEY\x27\n" -i /etc/zulip/settings.py)
 
 
-if [ ! -z $LDAP_SERVER ]; then 
+if [ ! -z $LDAP_SERVER ]; then
+
+    if [ ! -z $LDAP_SERVER_PORT ] && [ $LDAP_SERVER_PORT != "389" ]; then
+        LDAP_SERVER_URL="$LDAP_SERVER:$LDAP_SERVER_PORT"
+    else
+        LDAP_SERVER_URL=$LDAP_SERVER
+    fi
 
     sudo grep -q "^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*" /etc/zulip/settings.py \
-        && sudo sed "s/^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_SERVER_URI = \x27ldap:\/\/$LDAP_SERVER\x27/" -i /etc/zulip/settings.py \
-        || sudo  sed "$ a\AUTH_LDAP_SERVER_URI = \x27ldap:\/\/$LDAP_SERVER\x27" -i /etc/zulip/settings.py
+        && sudo sed "s/^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_SERVER_URI = \x27$LDAP_PROTOCOL:\/\/$LDAP_SERVER_URL\x27/" -i /etc/zulip/settings.py \
+        || sudo  sed "$ a\AUTH_LDAP_SERVER_URI = \x27$LDAP_PROTOCOL:\/\/$LDAP_SERVER_URL\x27" -i /etc/zulip/settings.py
+fi
 
+if [ ! -z $LDAP_PASSWORD ]; then
     sudo grep -q "^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*" /etc/zulip/zulip-secrets.conf \
         && sudo sed "s/^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*.*/auth_ldap_bind_password = $LDAP_PASSWORD/" -i  /etc/zulip/zulip-secrets.conf \
         || sudo  sed "$ a\auth_ldap_bind_password = $LDAP_PASSWORD" -i  /etc/zulip/zulip-secrets.conf
+fi
 
-    if [ ! -z $LDAP_BIND_DN ]; then
-        sudo grep -q "^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*" /etc/zulip/settings.py \
+if [ ! -z $LDAP_BIND_DN ]; then
+    sudo grep -q "^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*" /etc/zulip/settings.py \
         && sudo sed "s/^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_BIND_DN = \x27$LDAP_BIND_DN\x27/" -i /etc/zulip/settings.py \
         || sudo  sed "$ a\AUTH_LDAP_BIND_DN = \x27$LDAP_BIND_DN\x27" -i /etc/zulip/settings.py
-    fi
 fi
 
 if has_class "zulip::profile::rabbitmq"; then
