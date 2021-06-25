@@ -97,19 +97,9 @@ def install_venv_deps(pip: str, requirements_file: str, is_provision: bool) -> N
             ]
         )
     else:
-
-        distro_info = parse_os_release()
-        vendor = distro_info["ID"]
-        os_version = distro_info["VERSION_ID"]
-        
-        if vendor == "ubuntu" and "20" in os_version:
-            PACKAGE_DIR='20'
-        else:
-            PACKAGE_DIR='18'
-
-        DEPS_ONE_DIR = ZULIP_PATH+"/packages/Ubuntu/"+PACKAGE_DIR+"/1"
-        DEPS_TWO_DIR = ZULIP_PATH+"/packages/Ubuntu/"+PACKAGE_DIR+"/2"
-        DEPS_THREE_DIR = ZULIP_PATH+"/packages/Ubuntu/"+PACKAGE_DIR+"/3"
+        DEPS_ONE_DIR = ZULIP_PATH+"/packages/py-deps/1"
+        DEPS_TWO_DIR = ZULIP_PATH+"/packages/py-deps/2"
+        DEPS_THREE_DIR = ZULIP_PATH+"/packages/py-deps/3"
 
         list_wheel_1 = os.listdir(DEPS_ONE_DIR)
         list_wheel_2 = os.listdir(DEPS_TWO_DIR)

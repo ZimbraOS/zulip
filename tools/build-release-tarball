@@ -50,6 +50,31 @@ git archive -o "$TARBALL" "--prefix=$prefix/" HEAD
 cd "$TMPDIR"
 tar -xf "$TARBALL"
 
+if [ -f /etc/os-release ]; then
+    os_info="$(
+        . /etc/os-release
+        printf '%s\n' "$ID" "$VERSION_ID"
+    )"
+    {
+        read -r os_id
+        read -r os_version_id
+    } <<<"$os_info"
+fi
+
+# copy depandencies
+if [ $os_id == "ubuntu" ] && [[ "$os_version_id" == 18* ]]; then
+    PY_DEPS_NAME=ubuntu
+    PY_DEPS_VERSION=18
+else 
+    PY_DEPS_NAME=ubuntu
+    PY_DEPS_VERSION=20
+fi
+
+PY_DEPS_PATH=${TMPDIR:?}/$prefix/packages/py-deps/
+mkdir -p $PY_DEPS_PATH
+cp -a "${TMPDIR:?}/$prefix/packages/all-py-deps/$PY_DEPS_NAME/$PY_DEPS_VERSION/." "$PY_DEPS_PATH"
+
+# override zimbra related changes
 while read -r i; do
     cp "${TMPDIR:?}/$prefix/zimbra/$i" "${TMPDIR:?}/$prefix/$i"
 done <"$TMPDIR/$prefix/tools/zimbra-tarball-include.txt"
