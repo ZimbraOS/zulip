@@ -132,7 +132,7 @@ fi
 
 if [[ "$ZULIP_ADMINISTRATOR"  == "" ]]; then
     while true; do
-        echo -n "Please enter an email for administrator: "
+        echo -n "Please enter an email for Zulip administrator: "
         read ZULIP_ADMINISTRATOR
         if [[ "$ZULIP_ADMINISTRATOR"  != "" ]]; then
             break
@@ -142,7 +142,7 @@ fi
 
 if [[ "$EXTERNAL_HOST"  == "" ]]; then
     while true; do
-        echo -n "Please enter a host url: "
+        echo -n "Please enter Zulip server hostname: "
         read EXTERNAL_HOST
         if [[ "$EXTERNAL_HOST"  != "" ]]; then
             break
@@ -166,13 +166,13 @@ echo -n "Please enter LDAP protocol [ldap/ldaps] (default - ldap): "
 read LDAP_PROTOCOL
 if [[ "$LDAP_PROTOCOL"  == "ldaps" ]]; then
     LDAP_PROTOCOL='ldaps'
-    echo "Note: You have to add ca cert inside ldap configuration file manually and restart zulip once installation completes."
+    echo "Note: If Zimbra LDAP CA is self signed then you would need to add CA cert inside ca-certificates file manually."
 elif [ "$LDAP_PROTOCOL"  == "" ] || [ "$LDAP_PROTOCOL"  != "ldap" ]; then
     LDAP_PROTOCOL='ldap'
 fi
 
 while true; do
-    echo -n "Please enter LDAP url: "
+    echo -n "Please enter LDAP hostname: "
     read LDAP_SERVER
     if [[ "$LDAP_SERVER"  != "" ]]; then
         break
