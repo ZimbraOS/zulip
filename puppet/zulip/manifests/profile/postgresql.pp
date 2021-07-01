@@ -30,7 +30,7 @@ class zulip::profile::postgresql {
     owner   => 'postgres',
     group   => 'postgres',
     mode    => '0644',
-    content => template("${zulip::postgresql_base::postgresql_template}"),
+    content => template("zulip/postgresql/${zulip::postgresql_common::version}/postgresql.conf.template.erb"),
   }
 
   exec { $zulip::postgresql_base::postgresql_restart:

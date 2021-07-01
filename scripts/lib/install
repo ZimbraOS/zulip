@@ -28,6 +28,10 @@ Options:
       install process; used when this command is run once in a highly-controlled
       environment to produce an image which is used elsewhere.  Uncommon.
 
+  --postgresql-database-name=zulip
+      Sets the PostgreSQL database name.
+  --postgresql-database-user=zulip
+      Sets the PostgreSQL database user.
   --postgresql-version=13
       Sets the version of PostgreSQL that will be installed.
   --postgresql-missing-dictionaries
@@ -47,7 +51,7 @@ EOF
 
 # Shell option parsing.  Over time, we'll want to move some of the
 # environment variables below into this self-documenting system.
-args="$(getopt -o '' --long help,hostname:,email:,ldap-server:,ldap-password:,ldap-bind-dn:,certbot,self-signed-cert,cacert:,postgresql-version:,postgresql-missing-dictionaries,no-init-db,no-overwrite-settings,no-dist-upgrade -n "$0" -- "$@")"
+args="$(getopt -o '' --long help,hostname:,email:,certbot,self-signed-cert,cacert:,postgresql-database-name:,postgresql-database-user:,postgresql-version:,postgresql-missing-dictionaries,no-init-db,no-overwrite-settings,no-dist-upgrade -n "$0" -- "$@")"
 eval "set -- $args"
 while true; do
     case "$1" in
@@ -80,7 +84,16 @@ while true; do
             SELF_SIGNED_CERT=1
             shift
             ;;
-
+        --postgresql-database-name)
+            POSTGRESQL_DATABASE_NAME="$2"
+            shift
+            shift
+            ;;
+        --postgresql-database-user)
+            POSTGRESQL_DATABASE_USER="$2"
+            shift
+            shift
+            ;;
         --postgresql-version)
             POSTGRESQL_VERSION="$2"
             shift
@@ -103,21 +116,6 @@ while true; do
             NO_DIST_UPGRADE=1
             shift
             ;;
-        --ldap-server)
-            LDAP_SERVER="$2"
-            shift
-            shift
-            ;;
-        --ldap-password)
-            LDAP_PASSWORD="$2"
-            shift
-            shift
-            ;;
-        --ldap-bind-dn)
-            LDAP_BIND_DN="$2"
-            shift
-            shift
-            ;;
         --)
             shift
             break
@@ -128,78 +126,6 @@ done
 if [ "$#" -gt 0 ]; then
     usage >&2
     exit 1
-fi
-
-if [[ "$ZULIP_ADMINISTRATOR"  == "" ]]; then
-    while true; do
-        echo -n "Please enter an email for Zulip administrator: "
-        read ZULIP_ADMINISTRATOR
-        if [[ "$ZULIP_ADMINISTRATOR"  != "" ]]; then
-            break
-        fi
-    done 
-fi
-
-if [[ "$EXTERNAL_HOST"  == "" ]]; then
-    while true; do
-        echo -n "Please enter Zulip server hostname: "
-        read EXTERNAL_HOST
-        if [[ "$EXTERNAL_HOST"  != "" ]]; then
-            break
-        fi
-    done 
-fi
-
-echo -n "Do you want to use certbot [yes/no] (default - yes): "
-read USE_CERTBOT_INPUT
-if [ "$USE_CERTBOT_INPUT"  == "" ] || [ "$USE_CERTBOT_INPUT"  == "yes" ]; then
-    USE_CERTBOT=1
-elif [[ "$USE_CERTBOT_INPUT"  == "no" ]]; then
-    echo -n "Do you want to use self signed cert [yes/no] (default - yes): "
-    read SELF_SIGNED_CERT_INPUT
-    if [ "$SELF_SIGNED_CERT_INPUT"  == "" ] || [ "$SELF_SIGNED_CERT_INPUT"  == "yes" ]; then
-        SELF_SIGNED_CERT=1
-    fi
-fi
-
-echo -n "Please enter LDAP protocol [ldap/ldaps] (default - ldap): "
-read LDAP_PROTOCOL
-if [[ "$LDAP_PROTOCOL"  == "ldaps" ]]; then
-    LDAP_PROTOCOL='ldaps'
-    echo "Note: If Zimbra LDAP CA is self signed then you would need to add CA cert inside ca-certificates file manually."
-elif [ "$LDAP_PROTOCOL"  == "" ] || [ "$LDAP_PROTOCOL"  != "ldap" ]; then
-    LDAP_PROTOCOL='ldap'
-fi
-
-
-if [[ "$LDAP_SERVER"  == "" ]]; then
-    while true; do
-        echo -n "Please enter LDAP hostname: "
-        read LDAP_SERVER
-        if [[ "$LDAP_SERVER"  != "" ]]; then
-            break
-        fi
-    done
-fi
-
-echo -n "Please enter LDAP port (default - 389): "
-read LDAP_SERVER_PORT
-if [[ "$LDAP_SERVER_PORT"  == "" ]]; then
-    LDAP_SERVER_PORT=389
-fi
-
-while true; do
-    echo -n "Please enter LDAP password: "
-    read LDAP_PASSWORD
-    if [[ "$LDAP_PASSWORD"  != "" ]]; then
-        break
-    fi
-done 
-
-echo -n "Please enter LDAP bind dn (default - uid=zimbra,cn=admins,cn=zimbra): "
-read LDAP_BIND_DN
-if [[ "$LDAP_BIND_DN"  == "" ]]; then
-    LDAP_BIND_DN='uid=zimbra,cn=admins,cn=zimbra'
 fi
 
 ## Options from environment variables.
@@ -254,6 +180,11 @@ set -x
 
 ZULIP_PATH="$(readlink -f "$(dirname "$0")"/../..)"
 
+# Force a known locale.  Some packages on PyPI fail to install in some locales.
+export LC_ALL="C.UTF-8"
+export LANG="C.UTF-8"
+export LANGUAGE="C.UTF-8"
+
 # Force a known path; this fixes problems on Debian where `su` from
 # non-root may not adjust `$PATH` to root's.
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -281,7 +212,7 @@ if [ -f /etc/os-release ]; then
 fi
 
 case "$os_id$os_version_id" in
-    centos7 | debian10 | debian11 | ubuntu18.04 | ubuntu20.04) ;;
+    debian10 | debian11 | ubuntu18.04 | ubuntu20.04) ;;
     *)
         set +x
         cat <<EOF
@@ -289,8 +220,8 @@ case "$os_id$os_version_id" in
 Unsupported OS release: $os_id $os_version_id
 
 Zulip in production is supported only on:
- - Debian 11 "bullseye" (beta)
  - Debian 10 "buster"
+ - Debian 11 "bullseye" (beta)
  - Ubuntu 18.04 LTS "bionic"
  - Ubuntu 20.04 LTS "focal"
 
@@ -300,23 +231,6 @@ EOF
         exit 1
         ;;
 esac
-
-# Force a known locale.  Some packages on PyPI fail to install in some locales.
-if [ "$os_id" = centos ]; then
-    export LC_ALL="en_US.UTF-8"
-    export LANG="en_US.UTF-8"
-    export LANGUAGE="en_US.UTF-8"
-else
-    export LC_ALL="C.UTF-8"
-    export LANG="C.UTF-8"
-    export LANGUAGE="C.UTF-8"
-fi
-
-# Create certificate and put it to the right place
-if [ "$os_id" = centos ]; then
-    groupadd ssl-cert
-    chown root:ssl-cert /etc/pki/tls/private
-fi
 
 if [ "$os_id" = ubuntu ] && ! apt-cache policy \
     | grep -q "^     release v=$os_version_id,o=Ubuntu,a=$os_version_codename,n=$os_version_codename,l=Ubuntu,c=universe"; then
@@ -430,7 +344,7 @@ if [ "$package_system" = apt ]; then
     # `zulip::profile::base` such that the new dependency is seen by
     # upgrades, as well as new installs.
     if ! apt-get install -y \
-        python3 python3-yaml puppet git curl wget jq crudini \
+        python3 python3-yaml puppet git curl jq crudini \
         "${ADDITIONAL_PACKAGES[@]}"; then
         set +x
         echo -e '\033[0;31m' >&2
@@ -441,7 +355,7 @@ if [ "$package_system" = apt ]; then
     fi
 elif [ "$package_system" = yum ]; then
     if ! yum install -y \
-        python3 python3-pyyaml puppet git curl wget jq crudini \
+        python3 python3-pyyaml puppet git curl jq crudini \
         "${ADDITIONAL_PACKAGES[@]}"; then
         set +x
         echo -e '\033[0;31m' >&2
@@ -467,6 +381,7 @@ if [ "$VIRTUALENV_NEEDED" = "yes" ]; then
 fi
 
 "$ZULIP_PATH"/scripts/lib/install-node
+"$ZULIP_PATH"/scripts/lib/install-yarn
 
 # Generate /etc/zulip/zulip.conf .
 mkdir -p /etc/zulip
@@ -511,8 +426,16 @@ EOF
 
     # We only need the PostgreSQL version setting on database hosts; but
     # we don't know if this is a database host until we have the catalog summary.
-    if ! has_class "zulip::postgresql_common"; then
+    if ! has_class "zulip::postgresql_common" || [ "$package_system" != apt ]; then
         crudini --del /etc/zulip/zulip.conf postgresql
+    fi
+
+    if [ -n "$POSTGRESQL_DATABASE_NAME" ]; then
+        crudini --set /etc/zulip/zulip.conf postgresql database_name "$POSTGRESQL_DATABASE_NAME"
+    fi
+
+    if [ -n "$POSTGRESQL_DATABASE_USER" ]; then
+        crudini --set /etc/zulip/zulip.conf postgresql database_user "$POSTGRESQL_DATABASE_USER"
     fi
 
     # Note: there are four dpkg-query outputs to consider:
@@ -583,88 +506,6 @@ EOF
     fi
 fi
 
-DATA_DIR=/opt/zimbra/data/zulip
-POSTGRESQL_DIR=$DATA_DIR/postgresql
-RABBITMQ_DIR=$DATA_DIR/rabbitmq
-POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/main
-RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
-POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
-ZULIP_UPLOAD_DIR=/home/zulip/uploads
-ZIMBRA_ZULIP_UPLOAD_DIR=$DATA_DIR/uploads
-
-
-if [ ! -d "$DATA_DIR" ]; then 
-    echo "Create directory $DATA_DIR"
-    mkdir -p "$DATA_DIR"
-fi
-
-if [ ! -d "$POSTGRESQL_DATA_DIR" ]; then
-    echo "Create directory $POSTGRESQL_DATA_DIR"
-    mkdir -p "$POSTGRESQL_DATA_DIR"
-fi
-
-if [ ! -d "$RABBITMQ_DIR" ]; then
-    echo "Create directory $RABBITMQ_DIR"
-    mkdir -p "$RABBITMQ_DIR"
-fi
-
-if [ ! -d "$ZIMBRA_ZULIP_UPLOAD_DIR" ]; then
-    echo "Create directory $ZIMBRA_ZULIP_UPLOAD_DIR"
-    mkdir -p "$ZIMBRA_ZULIP_UPLOAD_DIR"
-fi
-
-# change upload data path
-chown zulip:zulip $ZIMBRA_ZULIP_UPLOAD_DIR
-ln -nsf $ZIMBRA_ZULIP_UPLOAD_DIR $ZULIP_UPLOAD_DIR
-
-
-# change postgres data path 
-echo "Update postgress data dir to $POSTGRESQL_DATA_DIR"
-sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
-
-systemctl stop postgresql
-chown -R postgres:postgres $POSTGRESQL_DIR
-rsync -av /var/lib/postgresql/$POSTGRESQL_VERSION $POSTGRESQL_DIR
-systemctl start postgresql
-
-# change rabbitmq data path
-echo "Update rabbitmq data dir to $RABBITMQ_DIR"
-systemctl stop rabbitmq-server
-sudo grep -q "^RABBITMQ_MNESIA_BASE="  $RABBITMQ_CONF_PATH && sudo sed "s|^RABBITMQ_MNESIA_BASE=[^\n]*|RABBITMQ_MNESIA_BASE=$RABBITMQ_DIR|" -i $RABBITMQ_CONF_PATH ||  sudo  sed "$ aRABBITMQ_MNESIA_BASE=$RABBITMQ_DIR" -i $RABBITMQ_CONF_PATH
-
-chown rabbitmq:rabbitmq $RABBITMQ_DIR
-systemctl start rabbitmq-server
-
-# generate ZIMBRA_JWT_AUTH_KEY
-sudo grep -q "^ZIMBRA_JWT_AUTH_KEY[[:blank:]]*=*[[:blank:]]*"  /etc/zulip/settings.py \
-    || (JWT_AUTH_KEY=$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32);  sudo sed "$ a\ZIMBRA_JWT_AUTH_KEY = \x27$JWT_AUTH_KEY\x27\n" -i /etc/zulip/settings.py)
-
-
-if [ ! -z $LDAP_SERVER ]; then
-
-    if [ ! -z $LDAP_SERVER_PORT ] && [ $LDAP_SERVER_PORT != "389" ]; then
-        LDAP_SERVER_URL="$LDAP_SERVER:$LDAP_SERVER_PORT"
-    else
-        LDAP_SERVER_URL=$LDAP_SERVER
-    fi
-
-    sudo grep -q "^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*" /etc/zulip/settings.py \
-        && sudo sed "s/^AUTH_LDAP_SERVER_URI[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_SERVER_URI = \x27$LDAP_PROTOCOL:\/\/$LDAP_SERVER_URL\x27/" -i /etc/zulip/settings.py \
-        || sudo  sed "$ a\AUTH_LDAP_SERVER_URI = \x27$LDAP_PROTOCOL:\/\/$LDAP_SERVER_URL\x27" -i /etc/zulip/settings.py
-fi
-
-if [ ! -z $LDAP_PASSWORD ]; then
-    sudo grep -q "^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*" /etc/zulip/zulip-secrets.conf \
-        && sudo sed "s/^auth_ldap_bind_password[[:blank:]]*=*[[:blank:]]*.*/auth_ldap_bind_password = $LDAP_PASSWORD/" -i  /etc/zulip/zulip-secrets.conf \
-        || sudo  sed "$ a\auth_ldap_bind_password = $LDAP_PASSWORD" -i  /etc/zulip/zulip-secrets.conf
-fi
-
-if [ ! -z $LDAP_BIND_DN ]; then
-    sudo grep -q "^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*" /etc/zulip/settings.py \
-        && sudo sed "s/^AUTH_LDAP_BIND_DN[[:blank:]]*=*[[:blank:]]*.*/AUTH_LDAP_BIND_DN = \x27$LDAP_BIND_DN\x27/" -i /etc/zulip/settings.py \
-        || sudo  sed "$ a\AUTH_LDAP_BIND_DN = \x27$LDAP_BIND_DN\x27" -i /etc/zulip/settings.py
-fi
-
 if has_class "zulip::profile::rabbitmq"; then
     if ! rabbitmqctl status >/dev/null; then
         set +x
@@ -704,13 +545,14 @@ if has_class "zulip::app_frontend_base"; then
     fi
 fi
 
-
 # Set up a basic .gitconfig for the 'zulip' user
-(
-    cd / # Make sure the current working directory is readable by zulip
-    su zulip -c "git config --global user.email $ZULIP_ADMINISTRATOR"
-    su zulip -c "git config --global user.name 'Zulip Server ($EXTERNAL_HOST)'"
-)
+if [ -n "$ZULIP_ADMINISTRATOR" ]; then
+    (
+        cd / # Make sure the current working directory is readable by zulip
+        su zulip -c "git config --global user.email $ZULIP_ADMINISTRATOR"
+        su zulip -c "git config --global user.name 'Zulip Server ($EXTERNAL_HOST)'"
+    )
+fi
 
 if [ -n "$NO_INIT_DB" ]; then
     set +x
