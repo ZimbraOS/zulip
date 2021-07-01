@@ -592,6 +592,16 @@ POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
 ZULIP_UPLOAD_DIR=/home/zulip/uploads
 ZIMBRA_ZULIP_UPLOAD_DIR=$DATA_DIR/uploads
 
+if [ $os_id == "ubuntu" ] || [ $os_id == "debian" ]; then
+    POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/postgresql/$POSTGRESQL_VERSION
+    POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/main
+    POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
+elif [ $os_id == "centos" ]; then
+    POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/pgql/$POSTGRESQL_VERSION
+    POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/data
+    POSTGRESQL_CONF_PATH=/var/lib/pgql/$POSTGRESQL_VERSION/conf/postgresql.conf
+fi
+
 
 if [ ! -d "$DATA_DIR" ]; then 
     echo "Create directory $DATA_DIR"
@@ -624,7 +634,7 @@ sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH 
 
 systemctl stop postgresql
 chown -R postgres:postgres $POSTGRESQL_DIR
-rsync -av /var/lib/postgresql/$POSTGRESQL_VERSION $POSTGRESQL_DIR
+rsync -av $POSTGRESQL_DEFAULT_DATA_DIR $POSTGRESQL_DIR
 systemctl start postgresql
 
 # change rabbitmq data path
