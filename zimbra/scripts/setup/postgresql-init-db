@@ -13,22 +13,11 @@ set -x
 if [ -f /etc/os-release ]; then
     os_info="$(
         . /etc/os-release
-        printf '%s\n' "$ID" "$ID_LIKE" "$VERSION_ID" "$VERSION_CODENAME"
+        printf '%s\n' "$ID" "$VERSION_ID"
     )"
     {
         read -r os_id
-        read -r os_id_like
-        read -r os_version_id
-        read -r os_version_codename || true
     } <<<"$os_info"
-    case " $os_id $os_id_like " in
-        *' debian '*)
-            package_system="apt"
-            ;;
-        *' rhel '*)
-            package_system="yum"
-            ;;
-    esac
 fi
 
 # Do package update, e.g. do `apt-get update` on Debian

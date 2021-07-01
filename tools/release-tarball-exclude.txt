@@ -14,3 +14,4 @@ zerver/tests
 frontend_tests
 zimbra/
 packages/all-py-deps/
+packages/all-system-deps/

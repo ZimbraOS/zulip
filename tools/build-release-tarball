@@ -62,7 +62,11 @@ if [ -f /etc/os-release ]; then
 fi
 
 # copy depandencies
-if [ $os_id == "ubuntu" ] && [[ "$os_version_id" == 18* ]]; then
+if [ $os_id == "centos" ] && [[ "$os_version_id" == 7* ]]; then
+    PY_DEPS_NAME=centos
+    PY_DEPS_VERSION=7
+    SYS_DEPS_NAME=centos7
+elif [ $os_id == "ubuntu" ] && [[ "$os_version_id" == 18* ]]; then
     PY_DEPS_NAME=ubuntu
     PY_DEPS_VERSION=18
 else 
@@ -73,6 +77,12 @@ fi
 PY_DEPS_PATH=${TMPDIR:?}/$prefix/packages/py-deps/
 mkdir -p $PY_DEPS_PATH
 cp -a "${TMPDIR:?}/$prefix/packages/all-py-deps/$PY_DEPS_NAME/$PY_DEPS_VERSION/." "$PY_DEPS_PATH"
+
+if [ -n "$SYS_DEPS_NAME" ]; then
+    SYS_DEPS_PATH=${TMPDIR:?}/$prefix/packages/sys-deps/
+    mkdir -p $SYS_DEPS_PATH
+    cp -a "${TMPDIR:?}/$prefix/packages/all-system-deps/$SYS_DEPS_NAME/." "$SYS_DEPS_PATH"
+if
 
 # override zimbra related changes
 while read -r i; do
