@@ -82,7 +82,7 @@ if [ -n "$SYS_DEPS_NAME" ]; then
     SYS_DEPS_PATH=${TMPDIR:?}/$prefix/packages/sys-deps/
     mkdir -p $SYS_DEPS_PATH
     cp -a "${TMPDIR:?}/$prefix/packages/all-system-deps/$SYS_DEPS_NAME/." "$SYS_DEPS_PATH"
-if
+fi
 
 # override zimbra related changes
 while read -r i; do
