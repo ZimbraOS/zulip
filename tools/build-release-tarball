@@ -61,6 +61,7 @@ if [ -f /etc/os-release ]; then
     } <<<"$os_info"
 fi
 
+SYS_DEPS_NAME=""
 # copy depandencies
 if [ $os_id == "centos" ] && [[ "$os_version_id" == 7* ]]; then
     PY_DEPS_NAME=centos
