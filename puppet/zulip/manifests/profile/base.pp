@@ -64,7 +64,6 @@ class zulip::profile::base {
       $release_name = "${::operatingsystem}${::operatingsystemmajrelease}"
       $base_packages = [
         'python3',
-        'python3-pyyaml',
         'puppet',
         'git',
         'curl',

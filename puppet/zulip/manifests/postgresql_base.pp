@@ -19,13 +19,17 @@ class zulip::postgresql_base {
       $postgresql_restart = "pg_ctlcluster ${zulip::postgresql_common::version} main restart"
       $postgresql_dict_dict = '/var/cache/postgresql/dicts/en_us.dict'
       $postgresql_dict_affix = '/var/cache/postgresql/dicts/en_us.affix'
+      $postgresql_user_reqs = [
+        Package[$postgresql]
+      ]
+      $postgresql_template = "zulip/postgresql/${zulip::postgresql_common::version}/postgresql.conf.template.erb"
     }
     'redhat': {
       $postgresql = "postgresql${zulip::postgresql_common::version}"
       $postgresql_sharedir = "/usr/pgsql-${zulip::postgresql_common::version}/share"
       $postgresql_confdirs = [
         "/var/lib/pgsql/${zulip::postgresql_common::version}",
-        "/var/lib/pgsql/${zulip::postgresql_common::version}/data",
+        "/var/lib/pgsql/${zulip::postgresql_common::version}/conf",
       ]
       $postgresql_confdir = $postgresql_confdirs[-1]
       $postgresql_datadir = "/var/lib/pgsql/${zulip::postgresql_common::version}/data"
@@ -37,6 +41,8 @@ class zulip::postgresql_base {
       # link directly to the hunspell directory.
       $postgresql_dict_dict = '/usr/share/myspell/en_US.dic'
       $postgresql_dict_affix = '/usr/share/myspell/en_US.aff'
+      $postgresql_user_reqs = []
+      $postgresql_template = "zulip/postgresql/${zulip::postgresql_common::version}/postgresql.conf.centos.template.erb"
     }
     default: {
       fail('osfamily not supported')
@@ -45,18 +51,18 @@ class zulip::postgresql_base {
 
   file { "${tsearch_datadir}/en_us.dict":
     ensure  => 'link',
-    require => Package[$postgresql],
+    require => $postgresql_user_reqs,
     target  => $postgresql_dict_dict,
   }
   file { "${tsearch_datadir}/en_us.affix":
     ensure  => 'link',
-    require => Package[$postgresql],
+    require => $postgresql_user_reqs,
     target  => $postgresql_dict_affix,
 
   }
   file { "${tsearch_datadir}/zulip_english.stop":
     ensure  => file,
-    require => Package[$postgresql],
+    require => $postgresql_user_reqs,
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
