@@ -22,9 +22,9 @@ fi
 
 # Do package update, e.g. do `apt-get update` on Debian
 if [ "$os_id" = "centos" ]; then
-    DATABASE_FILE="create-db-debian.sql"
-else 
     DATABASE_FILE="create-db-rhel.sql"
+else 
+    DATABASE_FILE="create-db-debian.sql"
 fi
 
 # What user should we use for connecting to the database
