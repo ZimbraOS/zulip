@@ -86,9 +86,7 @@ if [ -n "$SYS_DEPS_NAME" ]; then
 fi
 
 # override zimbra related changes
-while read -r i; do
-    cp "${TMPDIR:?}/$prefix/zimbra/$i" "${TMPDIR:?}/$prefix/$i"
-done <"$TMPDIR/$prefix/tools/zimbra-tarball-include.txt"
+rsync -av "${TMPDIR:?}/$prefix/zimbra/" "${TMPDIR:?}/$prefix/"
 
 while read -r i; do
     rm -r --interactive=never "${TMPDIR:?}/$prefix/$i"
