@@ -67,6 +67,7 @@ if [ $os_id == "centos" ] && [[ "$os_version_id" == 7* ]]; then
     PY_DEPS_NAME=centos
     PY_DEPS_VERSION=7
     SYS_DEPS_NAME=centos7
+    export LC_CTYPE=en_US.UTF-8
 elif [ $os_id == "ubuntu" ] && [[ "$os_version_id" == 18* ]]; then
     PY_DEPS_NAME=ubuntu
     PY_DEPS_VERSION=18
