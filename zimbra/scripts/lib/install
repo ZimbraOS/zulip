@@ -306,16 +306,15 @@ if [ "$os_id" = centos ]; then
     export LC_ALL="en_US.UTF-8"
     export LANG="en_US.UTF-8"
     export LANGUAGE="en_US.UTF-8"
+
+    # Create certificate and put it to the right place
+    openssl req -nodes -newkey rsa:2048 -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem -subj "/C=IN/ST=MH/L=PN/O=Zulip/OU=Dev/CN=$EXTERNAL_HOST/emailAddress=$ZULIP_ADMINISTRATOR"
+    groupadd ssl-cert
+    chown root:ssl-cert /etc/pki/tls/private
 else
     export LC_ALL="C.UTF-8"
     export LANG="C.UTF-8"
     export LANGUAGE="C.UTF-8"
-fi
-
-# Create certificate and put it to the right place
-if [ "$os_id" = centos ]; then
-    groupadd ssl-cert
-    chown root:ssl-cert /etc/pki/tls/private
 fi
 
 if [ "$os_id" = ubuntu ] && ! apt-cache policy \

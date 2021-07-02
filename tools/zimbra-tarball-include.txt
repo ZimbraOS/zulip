@@ -1,6 +1,0 @@
-zproject/backends.py
-zproject/urls.py
-zproject/computed_settings.py
-zerver/views/zauth.py
-puppet/zulip/files/nginx/zulip-include-common/headers
-puppet/zulip/files/nginx/zulip-include-frontend/app
