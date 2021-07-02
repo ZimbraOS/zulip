@@ -585,9 +585,7 @@ fi
 DATA_DIR=/opt/zimbra/data/zulip
 POSTGRESQL_DIR=$DATA_DIR/postgresql
 RABBITMQ_DIR=$DATA_DIR/rabbitmq
-POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/main
 RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
-POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
 ZULIP_UPLOAD_DIR=/home/zulip/uploads
 ZIMBRA_ZULIP_UPLOAD_DIR=$DATA_DIR/uploads
 
