@@ -630,10 +630,9 @@ ln -nsf $ZIMBRA_ZULIP_UPLOAD_DIR $ZULIP_UPLOAD_DIR
 echo "Update postgress data dir to $POSTGRESQL_DATA_DIR"
 sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
 
-systemctl stop postgresql
 chown -R postgres:postgres $POSTGRESQL_DIR
 rsync -av $POSTGRESQL_DEFAULT_DATA_DIR $POSTGRESQL_DIR
-systemctl start postgresql
+systemctl restart postgresql
 
 # change rabbitmq data path
 echo "Update rabbitmq data dir to $RABBITMQ_DIR"
