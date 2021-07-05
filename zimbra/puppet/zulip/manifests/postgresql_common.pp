@@ -5,7 +5,6 @@ class zulip::postgresql_common {
       $postgresql = "postgresql-${version}"
       $postgresql_packages = [
         # The database itself
-        $postgresql,
         # tools for database monitoring; formerly ptop
         'pgtop',
         # our dictionary
@@ -16,7 +15,6 @@ class zulip::postgresql_common {
         'python3-dateutil', # TODO: use a virtualenv instead
       ]
       $postgresql_user_reqs = [
-        Package[$postgresql],
         Package['ssl-cert'],
       ]
     }

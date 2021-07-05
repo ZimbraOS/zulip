@@ -539,6 +539,54 @@ EOF
     fi
 fi
 
+DATA_DIR=/opt/zimbra/data/zulip
+POSTGRESQL_DIR=$DATA_DIR/postgresql
+RABBITMQ_DIR=$DATA_DIR/rabbitmq
+RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
+ZULIP_UPLOAD_DIR=/home/zulip/uploads
+ZIMBRA_ZULIP_UPLOAD_DIR=$DATA_DIR/uploads
+
+if [ $os_id == "ubuntu" ] || [ $os_id == "debian" ]; then
+    POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/postgresql/$POSTGRESQL_VERSION
+    POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/main
+    POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
+elif [ $os_id == "centos" ]; then
+    POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/pgql/$POSTGRESQL_VERSION
+    POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/data
+    POSTGRESQL_CONF_PATH=/var/lib/pgql/$POSTGRESQL_VERSION/conf/postgresql.conf
+fi
+
+
+if [ ! -d "$DATA_DIR" ]; then 
+    echo "Create directory $DATA_DIR"
+    mkdir -p "$DATA_DIR"
+fi
+
+if [ ! -d "$POSTGRESQL_DATA_DIR" ]; then
+    echo "Create directory $POSTGRESQL_DATA_DIR"
+    mkdir -p "$POSTGRESQL_DATA_DIR"
+fi
+
+if [ ! -d "$RABBITMQ_DIR" ]; then
+    echo "Create directory $RABBITMQ_DIR"
+    mkdir -p "$RABBITMQ_DIR"
+fi
+
+if [ ! -d "$ZIMBRA_ZULIP_UPLOAD_DIR" ]; then
+    echo "Create directory $ZIMBRA_ZULIP_UPLOAD_DIR"
+    mkdir -p "$ZIMBRA_ZULIP_UPLOAD_DIR"
+fi
+
+
+if [ "$os_id" = ubuntu ]; then
+  apt-get install -y postgresql-$POSTGRESQL_VERSION
+  chown -R postgres:postgres $POSTGRESQL_DIR
+  sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
+  su postgres -c "/usr/lib/postgresql/13/bin/initdb -D $POSTGRESQL_DATA_DIR"
+  pg_ctlcluster 13 main restart
+fi
+
+
 if has_class "zulip::app_frontend_base"; then
     if [ -z "$NO_OVERWRITE_SETTINGS" ] || ! [ -e "/etc/zulip/settings.py" ]; then
         cp -a "$ZULIP_PATH"/zproject/prod_settings_template.py /etc/zulip/settings.py
@@ -582,57 +630,6 @@ EOF
         )
     fi
 fi
-
-DATA_DIR=/opt/zimbra/data/zulip
-POSTGRESQL_DIR=$DATA_DIR/postgresql
-RABBITMQ_DIR=$DATA_DIR/rabbitmq
-RABBITMQ_CONF_PATH=/etc/rabbitmq/rabbitmq-env.conf
-ZULIP_UPLOAD_DIR=/home/zulip/uploads
-ZIMBRA_ZULIP_UPLOAD_DIR=$DATA_DIR/uploads
-
-if [ $os_id == "ubuntu" ] || [ $os_id == "debian" ]; then
-    POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/postgresql/$POSTGRESQL_VERSION
-    POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/main
-    POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
-elif [ $os_id == "centos" ]; then
-    POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/pgql/$POSTGRESQL_VERSION
-    POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/data
-    POSTGRESQL_CONF_PATH=/var/lib/pgql/$POSTGRESQL_VERSION/conf/postgresql.conf
-fi
-
-
-if [ ! -d "$DATA_DIR" ]; then 
-    echo "Create directory $DATA_DIR"
-    mkdir -p "$DATA_DIR"
-fi
-
-if [ ! -d "$POSTGRESQL_DATA_DIR" ]; then
-    echo "Create directory $POSTGRESQL_DATA_DIR"
-    mkdir -p "$POSTGRESQL_DATA_DIR"
-fi
-
-if [ ! -d "$RABBITMQ_DIR" ]; then
-    echo "Create directory $RABBITMQ_DIR"
-    mkdir -p "$RABBITMQ_DIR"
-fi
-
-if [ ! -d "$ZIMBRA_ZULIP_UPLOAD_DIR" ]; then
-    echo "Create directory $ZIMBRA_ZULIP_UPLOAD_DIR"
-    mkdir -p "$ZIMBRA_ZULIP_UPLOAD_DIR"
-fi
-
-# change upload data path
-chown zulip:zulip $ZIMBRA_ZULIP_UPLOAD_DIR
-ln -nsf $ZIMBRA_ZULIP_UPLOAD_DIR $ZULIP_UPLOAD_DIR
-
-
-# change postgres data path 
-echo "Update postgress data dir to $POSTGRESQL_DATA_DIR"
-sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
-
-chown -R postgres:postgres $POSTGRESQL_DIR
-rsync -av $POSTGRESQL_DEFAULT_DATA_DIR $POSTGRESQL_DIR
-systemctl restart postgresql
 
 # change rabbitmq data path
 echo "Update rabbitmq data dir to $RABBITMQ_DIR"

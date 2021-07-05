@@ -12,16 +12,14 @@ class zulip::postgresql_base {
         "/etc/postgresql/${zulip::postgresql_common::version}/main",
       ]
       $postgresql_confdir = $postgresql_confdirs[-1]
-      $postgresql_datadir = "/var/lib/postgresql/${zulip::postgresql_common::version}/main"
+      $postgresql_datadir = "/opt/zimbra/data/zulip/postgresql/${zulip::postgresql_common::version}/main"
       $tsearch_datadir = "${postgresql_sharedir}/tsearch_data"
       $pgroonga_setup_sql_path = "${postgresql_sharedir}/pgroonga_setup.sql"
       $setup_system_deps = 'setup_apt_repo'
       $postgresql_restart = "pg_ctlcluster ${zulip::postgresql_common::version} main restart"
       $postgresql_dict_dict = '/var/cache/postgresql/dicts/en_us.dict'
       $postgresql_dict_affix = '/var/cache/postgresql/dicts/en_us.affix'
-      $postgresql_user_reqs = [
-        Package[$postgresql]
-      ]
+      $postgresql_user_reqs = []
       $postgresql_template = "zulip/postgresql/${zulip::postgresql_common::version}/postgresql.conf.template.erb"
     }
     'redhat': {
@@ -29,10 +27,10 @@ class zulip::postgresql_base {
       $postgresql_sharedir = "/usr/pgsql-${zulip::postgresql_common::version}/share"
       $postgresql_confdirs = [
         "/var/lib/pgsql/${zulip::postgresql_common::version}",
-        "/var/lib/pgsql/${zulip::postgresql_common::version}/conf",
+        "/var/lib/pgsql/${zulip::postgresql_common::version}/data",
       ]
       $postgresql_confdir = $postgresql_confdirs[-1]
-      $postgresql_datadir = "/var/lib/pgsql/${zulip::postgresql_common::version}/data"
+      $postgresql_datadir = "/opt/zimbra/data/zulip/pgsql/${zulip::postgresql_common::version}/data"
       $tsearch_datadir = "${postgresql_sharedir}/tsearch_data/"
       $pgroonga_setup_sql_path = "${postgresql_sharedir}/pgroonga_setup.sql"
       $setup_system_deps = 'setup_yum_repo'
