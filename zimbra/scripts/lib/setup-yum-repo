@@ -57,6 +57,8 @@ if [ "$is_centos" = true ]; then
     rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/puppet5-release-el-7.noarch.rpm
     rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/python36-PyYAML-3.13-1.el7.x86_64.rpm
 
+    ln -nsf /opt/puppetlabs/puppet/bin/puppet  /usr/bin/puppet
+    ln -nsf /opt/puppetlabs/puppet/bin/facter  /usr/bin/facter
     # PGroonga
     # https://pgroonga.github.io/install/centos.html
     yum localinstall -y https://packages.groonga.org/centos/groonga-release-latest.noarch.rpm
