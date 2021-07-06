@@ -474,6 +474,14 @@ fi
 
 "$ZULIP_PATH"/scripts/lib/install-node
 
+if [ -e /var/lib/puppet/classes.txt ]
+then
+    echo "/var/lib/puppet/classes.txt file exists!"
+else
+    mkdir /var/lib/puppet
+    touch /var/lib/puppet/classes.txt
+fi
+
 
 
 # Generate /etc/zulip/zulip.conf .
