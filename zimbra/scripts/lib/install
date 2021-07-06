@@ -584,11 +584,18 @@ fi
 
 
 if [ "$os_id" = ubuntu ]; then
-  apt-get install -y postgresql-$POSTGRESQL_VERSION
-  chown -R postgres:postgres $POSTGRESQL_DIR
-  sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
-  su postgres -c "/usr/lib/postgresql/13/bin/initdb -D $POSTGRESQL_DATA_DIR"
-  pg_ctlcluster 13 main restart
+  if which psql >/dev/null; then 
+    echo "Postgresql is already intalled";
+  else
+    apt-get install -y postgresql-$POSTGRESQL_VERSION
+  fi
+
+  if [[ ! -f "$POSTGRESQL_DATA_DIR/PG_VERSION" ]]; then
+    chown -R postgres:postgres $POSTGRESQL_DIR
+    sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
+    su postgres -c "/usr/lib/postgresql/13/bin/initdb -D $POSTGRESQL_DATA_DIR"
+    pg_ctlcluster 13 main restart
+  fi
 fi
 
 if [ "$os_id" = centos ]; then
