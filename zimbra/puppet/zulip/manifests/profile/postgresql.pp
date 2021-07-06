@@ -26,6 +26,7 @@ class zulip::profile::postgresql {
   $postgresql_conf_file = "${zulip::postgresql_base::postgresql_confdir}/postgresql.conf"
   file { $postgresql_conf_file:
     ensure  => file,
+#    require => $zulip::postgresql_base::postgresql_user_reqs,
     owner   => 'postgres',
     group   => 'postgres',
     mode    => '0644',
@@ -33,6 +34,7 @@ class zulip::profile::postgresql {
   }
 
   exec { $zulip::postgresql_base::postgresql_restart:
+#    require     => $zulip::postgresql_base::postgresql_user_reqs,
     refreshonly => true,
     subscribe   => [ File[$postgresql_conf_file] ],
   }

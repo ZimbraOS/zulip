@@ -586,6 +586,19 @@ if [ "$os_id" = ubuntu ]; then
   pg_ctlcluster 13 main restart
 fi
 
+if [ "$os_id" = centos ]; then
+  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql10-contrib-10.17-1PGDG.rhel7.x86_64
+  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql10-libs-10.17-1PGDG.rhel7.x86_64
+  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql-libs-9.2.24-7.el7_9.x86_64
+  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql10-server-10.17-1PGDG.rhel7.x86_64
+  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql10-10.17-1PGDG.rhel7.x86_64
+  chown -R postgres:postgres $POSTGRESQL_DIR
+  sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
+  su postgres -c "/usr/pgsql-10/bin/postgresql-10-setup initdb" -D $POSTGRESQL_DATA_DIR
+  sudo systemctl restart postgresql-10
+fi
+
+
 
 if has_class "zulip::app_frontend_base"; then
     if [ -z "$NO_OVERWRITE_SETTINGS" ] || ! [ -e "/etc/zulip/settings.py" ]; then
@@ -683,6 +696,14 @@ EOF
         exit 1
     fi
     "$ZULIP_PATH"/scripts/setup/configure-rabbitmq
+fi
+
+if [ "$os_id" = centos ]; then
+  rpm  -i "$ZULIP_PATH"/packages/sys-deps/firewalld-0.6.3-13.el7_9.noarch.rpm
+  firewall-cmd --permanent --add-port=5672/tcp
+  firewall-cmd --reload
+  systemctl stop firewalld
+  systemctl start firewalld
 fi
 
 if has_class "zulip::postgresql_common" && [ -z "$NO_INIT_DB" ]; then
