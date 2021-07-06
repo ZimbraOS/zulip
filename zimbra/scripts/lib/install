@@ -623,8 +623,8 @@ if [ "$os_id" = centos ]; then
   
   if [[ ! -f "$POSTGRESQL_DATA_DIR/PG_VERSION" ]]; then
     chown -R postgres:postgres $POSTGRESQL_DIR
-     sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
-    su postgres -c "/usr/pgsql-10/bin/postgresql-10-setup initdb" -D $POSTGRESQL_DATA_DIR
+    su postgres -c "/usr/pgsql-10/bin/postgresql-10-setup initdb"
+    sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
     sudo systemctl restart postgresql-10
   fi
 fi
