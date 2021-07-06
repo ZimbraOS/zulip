@@ -49,7 +49,7 @@ if [ "$is_centos" = true ]; then
     yum localinstall -y "https://yum.postgresql.org/$PGVER/redhat/rhel-$RHVER-$RHARCH/pgdg-redhat-repo-latest.noarch.rpm"
 
     for entry in `ls $ZULIP_PATH/packages/sys-deps`; do
-        rpm -i $ZULIP_PATH/packages/sys-deps/$entry
+        rpm -i --force $ZULIP_PATH/packages/sys-deps/$entry
     done
 
 
