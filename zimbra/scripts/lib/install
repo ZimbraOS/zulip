@@ -306,6 +306,7 @@ if [ "$os_id" = centos ]; then
     export LC_ALL="en_US.UTF-8"
     export LANG="en_US.UTF-8"
     export LANGUAGE="en_US.UTF-8"
+    POSTGRESQL_VERSION="10"
 
     # Create certificate and put it to the right place
     mkdir -p /etc/ssl/private
@@ -556,9 +557,9 @@ if [ $os_id == "ubuntu" ] || [ $os_id == "debian" ]; then
     POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/main
     POSTGRESQL_CONF_PATH=/etc/postgresql/$POSTGRESQL_VERSION/main/postgresql.conf
 elif [ $os_id == "centos" ]; then
-    POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/pgql/$POSTGRESQL_VERSION
+    POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/pgsql/$POSTGRESQL_VERSION
     POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/data
-    POSTGRESQL_CONF_PATH=/var/lib/pgql/$POSTGRESQL_VERSION/conf/postgresql.conf
+    POSTGRESQL_CONF_PATH=/var/lib/pgsql/$POSTGRESQL_VERSION/conf/postgresql.conf
 fi
 
 
@@ -612,7 +613,7 @@ if [ "$os_id" = centos ]; then
   
   if [[ ! -f "$POSTGRESQL_DATA_DIR/PG_VERSION" ]]; then
     chown -R postgres:postgres $POSTGRESQL_DIR
-    sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
+     sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
     su postgres -c "/usr/pgsql-10/bin/postgresql-10-setup initdb" -D $POSTGRESQL_DATA_DIR
     sudo systemctl restart postgresql-10
   fi
