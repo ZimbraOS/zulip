@@ -2,7 +2,7 @@
 set -x
 set -e
 
-ZULIP_PATH="$(readlink -f "$(dirname "$0")"/../..)"
+ZULIP_PATH="$(readlink -f "$(dirname "$0")"/../../..)"
 
 is_prod=false
 args="$(getopt -o '' --long prod -- "$@")"
@@ -49,13 +49,13 @@ if [ "$is_centos" = true ]; then
     yum localinstall -y "https://yum.postgresql.org/$PGVER/redhat/rhel-$RHVER-$RHARCH/pgdg-redhat-repo-latest.noarch.rpm"
 
 
-    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/crudini-0.9-1.el7.noarch.rpm
-    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/firewalld-0.6.3-13.el7_9.noarch.rpm
-    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/glibc-common-2.17-317.el7.x86_64.rpm /home/opc/zulip-server-test/packages/sys-deps/glibc-2.17-317.el7.x86_64.rpm
-    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/puppet-agent-5.5.22-1.el7.x86_64.rpm
-    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/puppet5-release-5.0.0-14.el7.noarch.rpm
-    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/puppet5-release-el-7.noarch.rpm
-    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/python36-PyYAML-3.13-1.el7.x86_64.rpm
+    rpm -i --force $ZULIP_PATH/packages/sys-deps/crudini-0.9-1.el7.noarch.rpm
+    rpm -i --force $ZULIP_PATH/packages/sys-deps/firewalld-0.6.3-13.el7_9.noarch.rpm
+    rpm -i --force $ZULIP_PATH/packages/sys-deps/glibc-common-2.17-317.el7.x86_64.rpm /home/opc/zulip-server-test/packages/sys-deps/glibc-2.17-317.el7.x86_64.rpm
+    rpm -i --force $ZULIP_PATH/packages/sys-deps/puppet-agent-5.5.22-1.el7.x86_64.rpm
+    rpm -i --force $ZULIP_PATH/packages/sys-deps/puppet5-release-5.0.0-14.el7.noarch.rpm
+    rpm -i --force $ZULIP_PATH/packages/sys-deps/puppet5-release-el-7.noarch.rpm
+    rpm -i --force $ZULIP_PATH/packages/sys-deps/python36-PyYAML-3.13-1.el7.x86_64.rpm
 
     ln -nsf /opt/puppetlabs/puppet/bin/puppet  /usr/bin/puppet
     ln -nsf /opt/puppetlabs/puppet/bin/facter  /usr/bin/facter
