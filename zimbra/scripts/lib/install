@@ -614,25 +614,35 @@ fi
 
 if [ "$os_id" = centos ]; then
   if which psql >/dev/null; then 
-    echo "Postgresql is already intalled";
+    echo "Postgresql is already intalled";    
+    if [[ ! -f "$POSTGRESQL_DATA_DIR/PG_VERSION" ]]; then
+        chown -R postgres:postgres $POSTGRESQL_DIR
+        sudo systemctl stop  postgresql-10
+        sed -i "s~^Environment=PGDATA=.*~Environment=PGDATA=$POSTGRESQL_DATA_DIR~" /usr/lib/systemd/system/postgresql-10.service
+        sudo systemctl daemon-reload
+        /usr/pgsql-10/bin/postgresql-10-setup initdb
+        sudo systemctl restart postgresql-10
+    fi
   else
     yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
     yum install -y postgresql10-server 
     chown -R postgres:postgres $POSTGRESQL_DIR
-    su postgres -c "/usr/pgsql-10/bin/postgresql-10-setup initdb"
-    CURRENTDATAPATH=$(cat postgres | grep Environment=PGDATA)
-    sed -i "s|$CURRENTDATAPATH|$POSTGRESQL_DATA_DIR|g" "/usr/lib/systemd/system/postgresql-10.service"
-    sudo systemctl restart postgresql-10
-  fi
-
-  
-  if [[ ! -f "$POSTGRESQL_DATA_DIR/PG_VERSION" ]]; then
-    sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
+    sed -i "s~^Environment=PGDATA=.*~Environment=PGDATA=$POSTGRESQL_DATA_DIR~" /usr/lib/systemd/system/postgresql-10.service
+    sudo systemctl daemon-reload
+    /usr/pgsql-10/bin/postgresql-10-setup initdb
     sudo systemctl restart postgresql-10
   fi
 fi
 
-
+if [ "$os_id" = centos ]; then
+  echo "########### firewall config for rabbitmq  ############"
+  rpm  -i --force  "$ZULIP_PATH"/packages/sys-deps/firewalld-0.6.3-13.el7_9.noarch.rpm
+  sudo firewall-cmd --permanent --add-port=5672/tcp
+  sudo firewall-cmd --reload
+  sudo systemctl stop firewalld
+  sudo systemctl start firewalld
+  sudo setenforce 0
+fi
 
 if has_class "zulip::app_frontend_base"; then
     if [ -z "$NO_OVERWRITE_SETTINGS" ] || ! [ -e "/etc/zulip/settings.py" ]; then
@@ -730,14 +740,6 @@ EOF
         exit 1
     fi
     "$ZULIP_PATH"/scripts/setup/configure-rabbitmq
-fi
-
-if [ "$os_id" = centos ]; then
-  rpm  -i --force  "$ZULIP_PATH"/packages/sys-deps/firewalld-0.6.3-13.el7_9.noarch.rpm
-  firewall-cmd --permanent --add-port=5672/tcp
-  firewall-cmd --reload
-  systemctl stop firewalld
-  systemctl start firewalld
 fi
 
 if has_class "zulip::postgresql_common" && [ -z "$NO_INIT_DB" ]; then
