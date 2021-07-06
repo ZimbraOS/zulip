@@ -616,14 +616,17 @@ if [ "$os_id" = centos ]; then
   if which psql >/dev/null; then 
     echo "Postgresql is already intalled";
   else
-    sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    sudo yum install postgresql10-server postgresql10 postgresql10-devel postgresql-contrib
+    yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    yum install -y postgresql10-server 
+    chown -R postgres:postgres $POSTGRESQL_DIR
+    su postgres -c "/usr/pgsql-10/bin/postgresql-10-setup initdb"
+    CURRENTDATAPATH=$(cat postgres | grep Environment=PGDATA)
+    sed -i "s|$CURRENTDATAPATH|$POSTGRESQL_DATA_DIR|g" "/usr/lib/systemd/system/postgresql-10.service"
+    sudo systemctl restart postgresql-10
   fi
 
   
   if [[ ! -f "$POSTGRESQL_DATA_DIR/PG_VERSION" ]]; then
-    chown -R postgres:postgres $POSTGRESQL_DIR
-    su postgres -c "/usr/pgsql-10/bin/postgresql-10-setup initdb"
     sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
     sudo systemctl restart postgresql-10
   fi
