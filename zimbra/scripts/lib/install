@@ -585,6 +585,9 @@ if [ ! -d "$ZIMBRA_ZULIP_UPLOAD_DIR" ]; then
     mkdir -p "$ZIMBRA_ZULIP_UPLOAD_DIR"
 fi
 
+# change upload data path
+chown zulip:zulip $ZIMBRA_ZULIP_UPLOAD_DIR
+ln -nsf $ZIMBRA_ZULIP_UPLOAD_DIR $ZULIP_UPLOAD_DIR
 
 if [ "$os_id" = ubuntu ]; then
   if which psql >/dev/null; then 
