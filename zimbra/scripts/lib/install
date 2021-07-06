@@ -592,11 +592,11 @@ if [ "$os_id" = ubuntu ]; then
 fi
 
 if [ "$os_id" = centos ]; then
-  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql10-contrib-10.17-1PGDG.rhel7.x86_64
-  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql10-libs-10.17-1PGDG.rhel7.x86_64
-  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql-libs-9.2.24-7.el7_9.x86_64
-  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql10-server-10.17-1PGDG.rhel7.x86_64
-  rpm  -i "$ZULIP_PATH"/packages/sys-deps/postgresql10-10.17-1PGDG.rhel7.x86_64
+  rpm  -i --force "$ZULIP_PATH"/packages/sys-deps/postgresql10-contrib-10.17-1PGDG.rhel7.x86_64
+  rpm  -i --force "$ZULIP_PATH"/packages/sys-deps/postgresql10-libs-10.17-1PGDG.rhel7.x86_64
+  rpm  -i --force "$ZULIP_PATH"/packages/sys-deps/postgresql-libs-9.2.24-7.el7_9.x86_64
+  rpm  -i --force "$ZULIP_PATH"/packages/sys-deps/postgresql10-server-10.17-1PGDG.rhel7.x86_64
+  rpm  -i --force "$ZULIP_PATH"/packages/sys-deps/postgresql10-10.17-1PGDG.rhel7.x86_64
   chown -R postgres:postgres $POSTGRESQL_DIR
   sudo grep -q "^data_directory[[:blank:]]*=*[[:blank:]]*"  $POSTGRESQL_CONF_PATH && sudo sed "s|^data_directory[[:blank:]]*=*[[:blank:]]*.*|data_directory = \x27$POSTGRESQL_DATA_DIR\x27|" -i $POSTGRESQL_CONF_PATH ||  sudo sed "$ adata_directory = \x27$POSTGRESQL_DATA_DIR\x27" -i $POSTGRESQL_CONF_PATH
   su postgres -c "/usr/pgsql-10/bin/postgresql-10-setup initdb" -D $POSTGRESQL_DATA_DIR
@@ -704,7 +704,7 @@ EOF
 fi
 
 if [ "$os_id" = centos ]; then
-  rpm  -i "$ZULIP_PATH"/packages/sys-deps/firewalld-0.6.3-13.el7_9.noarch.rpm
+  rpm  -i --force  "$ZULIP_PATH"/packages/sys-deps/firewalld-0.6.3-13.el7_9.noarch.rpm
   firewall-cmd --permanent --add-port=5672/tcp
   firewall-cmd --reload
   systemctl stop firewalld
