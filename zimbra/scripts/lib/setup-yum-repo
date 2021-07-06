@@ -52,6 +52,10 @@ if [ "$is_centos" = true ]; then
     rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/crudini-0.9-1.el7.noarch.rpm
     rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/firewalld-0.6.3-13.el7_9.noarch.rpm
     rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/glibc-common-2.17-317.el7.x86_64.rpm /home/opc/zulip-server-test/packages/sys-deps/glibc-2.17-317.el7.x86_64.rpm
+    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/puppet-agent-5.5.22-1.el7.x86_64.rpm
+    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/puppet5-release-5.0.0-14.el7.noarch.rpm
+    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/puppet5-release-el-7.noarch.rpm
+    rpm -i --force /home/opc/zulip-server-test/packages/sys-deps/python36-PyYAML-3.13-1.el7.x86_64.rpm
 
     # PGroonga
     # https://pgroonga.github.io/install/centos.html
