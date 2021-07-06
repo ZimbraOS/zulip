@@ -569,7 +569,7 @@ if [ $os_id == "ubuntu" ] || [ $os_id == "debian" ]; then
 elif [ $os_id == "centos" ]; then
     POSTGRESQL_DEFAULT_DATA_DIR=/var/lib/pgsql/$POSTGRESQL_VERSION
     POSTGRESQL_DATA_DIR=$POSTGRESQL_DIR/$POSTGRESQL_VERSION/data
-    POSTGRESQL_CONF_PATH=/var/lib/pgsql/$POSTGRESQL_VERSION/conf/postgresql.conf
+    POSTGRESQL_CONF_PATH=/var/lib/pgsql/$POSTGRESQL_VERSION/data/postgresql.conf
 fi
 
 
