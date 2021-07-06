@@ -617,7 +617,7 @@ if [ "$os_id" = centos ]; then
     echo "Postgresql is already intalled";
   else
     sudo yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    sudo yum install postgresql10-server postgresql10 postgresql10-devel
+    sudo yum install postgresql10-server postgresql10 postgresql10-devel postgresql-contrib
   fi
 
   
