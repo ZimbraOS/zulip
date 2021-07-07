@@ -474,14 +474,15 @@ fi
 
 "$ZULIP_PATH"/scripts/lib/install-node
 
-if [ -e /var/lib/puppet/classes.txt ]
-then
-    echo "/var/lib/puppet/classes.txt file exists!"
-else
-    mkdir /var/lib/puppet
-    touch /var/lib/puppet/classes.txt
+if [ "$os_id" = centos ]; then
+    if [ -e /var/lib/puppet/classes.txt ]
+    then
+        echo "/var/lib/puppet/classes.txt file exists!"
+    else
+        mkdir -p /var/lib/puppet
+        touch /var/lib/puppet/classes.txt
+    fi
 fi
-
 
 
 # Generate /etc/zulip/zulip.conf .
