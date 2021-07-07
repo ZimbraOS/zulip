@@ -19,7 +19,7 @@ class zulip::common {
       $supervisor_conf_file = '/etc/supervisord.conf'
       $supervisor_service = 'supervisord'
       $supervisor_start = 'systemctl start supervisord'
-      $supervisor_reload = 'systemctl reload supervisord'
+      $supervisor_reload = 'systemctl restart supervisord'
     }
     default: {
       fail('osfamily not supported')
