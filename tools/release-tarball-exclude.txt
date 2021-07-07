@@ -12,3 +12,6 @@ zproject/dev_settings.py
 zproject/test_settings.py
 zerver/tests
 frontend_tests
+zimbra/
+packages/all-py-deps/
+packages/all-system-deps/
