@@ -728,9 +728,9 @@ if [ ! -z $LDAP_BIND_DN ]; then
 fi
 
 if [ "$os_id" = centos ]; then
-    chmod -R zulip:zulip /var/lib/nginx
+    chown -R zulip:zulip /var/lib/nginx
     systemctl enable postgresql-10
-    systemctl enable rabbitmq-service
+    systemctl enable rabbitmq-server
     systemctl enable redis
     systemctl enable memcached
     systemctl enable supervisord
