@@ -727,6 +727,16 @@ if [ ! -z $LDAP_BIND_DN ]; then
         || sudo  sed "$ a\AUTH_LDAP_BIND_DN = \x27$LDAP_BIND_DN\x27" -i /etc/zulip/settings.py
 fi
 
+if [ "$os_id" = centos ]; then
+    chmod -R zulip:zulip /var/lib/nginx
+    systemctl enable postgresql-10
+    systemctl enable rabbitmq-service
+    systemctl enable redis
+    systemctl enable memcached
+    systemctl enable supervisord
+    sed -i 's~^SELINUX=.*~SELINUX=permissive~'  /etc/selinux/config
+fi
+
 if has_class "zulip::profile::rabbitmq"; then
     if ! rabbitmqctl status >/dev/null; then
         set +x
