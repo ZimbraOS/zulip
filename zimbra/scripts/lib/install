@@ -626,7 +626,7 @@ if [ "$os_id" = centos ]; then
     fi
   else
     yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    yum install -y postgresql10-server 
+    yum install -y postgresql10-server python-psycopg2
     chown -R postgres:postgres $POSTGRESQL_DIR
     sed -i "s~^Environment=PGDATA=.*~Environment=PGDATA=$POSTGRESQL_DATA_DIR~" /usr/lib/systemd/system/postgresql-10.service
     sudo systemctl daemon-reload
@@ -734,6 +734,7 @@ if [ "$os_id" = centos ]; then
     systemctl enable redis
     systemctl enable memcached
     systemctl enable supervisord
+    systemctl enable nginx
     sed -i 's~^SELINUX=.*~SELINUX=permissive~'  /etc/selinux/config
 fi
 
