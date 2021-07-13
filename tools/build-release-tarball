@@ -49,9 +49,53 @@ git archive -o "$TARBALL" "--prefix=$prefix/" HEAD
 
 cd "$TMPDIR"
 tar -xf "$TARBALL"
+
+if [ -f /etc/os-release ]; then
+    os_info="$(
+        . /etc/os-release
+        printf '%s\n' "$ID" "$VERSION_ID"
+    )"
+    {
+        read -r os_id
+        read -r os_version_id
+    } <<<"$os_info"
+fi
+
+SYS_DEPS_NAME=""
+# copy depandencies
+if [ $os_id == "centos" ] && [[ "$os_version_id" == 7* ]]; then
+    PY_DEPS_NAME=centos
+    PY_DEPS_VERSION=7
+    SYS_DEPS_NAME=centos7
+    export LC_CTYPE=en_US.UTF-8
+elif [ $os_id == "ubuntu" ] && [[ "$os_version_id" == 18* ]]; then
+    PY_DEPS_NAME=ubuntu
+    PY_DEPS_VERSION=18
+else 
+    PY_DEPS_NAME=ubuntu
+    PY_DEPS_VERSION=20
+fi
+
+PY_DEPS_PATH=${TMPDIR:?}/$prefix/packages/py-deps/
+mkdir -p $PY_DEPS_PATH
+cp -a "${TMPDIR:?}/$prefix/packages/all-py-deps/$PY_DEPS_NAME/$PY_DEPS_VERSION/." "$PY_DEPS_PATH"
+
+if [ -n "$SYS_DEPS_NAME" ]; then
+    SYS_DEPS_PATH=${TMPDIR:?}/$prefix/packages/sys-deps/
+    mkdir -p $SYS_DEPS_PATH
+    cp -a "${TMPDIR:?}/$prefix/packages/all-system-deps/$SYS_DEPS_NAME/." "$SYS_DEPS_PATH"
+fi
+
+# override zimbra related changes
+rsync -av "${TMPDIR:?}/$prefix/zimbra/" "${TMPDIR:?}/$prefix/"
+
 while read -r i; do
     rm -r --interactive=never "${TMPDIR:?}/$prefix/$i"
 done <"$TMPDIR/$prefix/tools/release-tarball-exclude.txt"
+
+
+
+
 tar -cf "$TARBALL" "$prefix"
 rm -rf "$prefix"
 
