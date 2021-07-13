@@ -387,6 +387,33 @@ if [ "$mem_kb" -lt 1860000 ]; then
     exit 1
 fi
 
+if [ "$package_system" = apt ]; then
+    # Note that any additions to these lists must also be added to
+    # `zulip::profile::base` such that the new dependency is seen by
+    # upgrades, as well as new installs.
+    if ! apt-get install -y \
+        python3 python3-yaml puppet git curl wget jq crudini \
+        "${ADDITIONAL_PACKAGES[@]}"; then
+        set +x
+        echo -e '\033[0;31m' >&2
+        echo "Installing packages failed; is network working and (on Ubuntu) the universe repository enabled?" >&2
+        echo >&2
+        echo -e '\033[0m' >&2
+        exit 1
+    fi
+elif [ "$package_system" = yum ]; then
+    if ! yum install -y \
+        python36 python36-PyYAML puppet git curl wget jq crudini \
+        "${ADDITIONAL_PACKAGES[@]}"; then
+        set +x
+        echo -e '\033[0;31m' >&2
+        echo "Installing packages failed; is network working?" >&2
+        echo >&2
+        echo -e '\033[0m' >&2
+        exit 1
+    fi
+fi
+
 # Do package update, e.g. do `apt-get update` on Debian
 if [ "$package_system" = apt ]; then
     # setup-apt-repo does an `apt-get update`
@@ -428,33 +455,6 @@ if [ -z "$NO_DIST_UPGRADE" ]; then
         # On CentOS, there is no need to do `yum -y upgrade` because `yum -y
         # update` already does the same thing.
         :
-    fi
-fi
-
-if [ "$package_system" = apt ]; then
-    # Note that any additions to these lists must also be added to
-    # `zulip::profile::base` such that the new dependency is seen by
-    # upgrades, as well as new installs.
-    if ! apt-get install -y \
-        python3 python3-yaml puppet git curl wget jq crudini \
-        "${ADDITIONAL_PACKAGES[@]}"; then
-        set +x
-        echo -e '\033[0;31m' >&2
-        echo "Installing packages failed; is network working and (on Ubuntu) the universe repository enabled?" >&2
-        echo >&2
-        echo -e '\033[0m' >&2
-        exit 1
-    fi
-elif [ "$package_system" = yum ]; then
-    if ! yum install -y \
-        python3 python3-pyyaml puppet git curl wget jq crudini \
-        "${ADDITIONAL_PACKAGES[@]}"; then
-        set +x
-        echo -e '\033[0;31m' >&2
-        echo "Installing packages failed; is network working?" >&2
-        echo >&2
-        echo -e '\033[0m' >&2
-        exit 1
     fi
 fi
 
@@ -626,7 +626,7 @@ if [ "$os_id" = centos ]; then
     fi
   else
     yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    yum install -y postgresql10-server python-psycopg2
+    yum install -y postgresql10-server python-psycopg2 hunspell-en-US
     chown -R postgres:postgres $POSTGRESQL_DIR
     sed -i "s~^Environment=PGDATA=.*~Environment=PGDATA=$POSTGRESQL_DATA_DIR~" /usr/lib/systemd/system/postgresql-10.service
     sudo systemctl daemon-reload

@@ -605,6 +605,10 @@ def has_application_server() -> bool:
         os.path.exists("/etc/supervisor/conf.d/zulip/zulip.conf")
         # Old path, relevant for upgrades
         or os.path.exists("/etc/supervisor/conf.d/zulip.conf")
+        #or in centos
+        or os.path.exists("/etc/supervisord.d/conf.d/zulip/zulip.conf")
+        # Old path, relevant for upgrades
+        or os.path.exists("/etc/supervisord.d/conf.d/zulip.conf")
     )
 
 
@@ -614,6 +618,10 @@ def has_process_fts_updates() -> bool:
         os.path.exists("/etc/supervisor/conf.d/zulip/zulip_db.conf")
         # Old path, relevant for upgrades
         or os.path.exists("/etc/supervisor/conf.d/zulip_db.conf")
+        # centos path
+        or os.path.exists("/etc/supervisord.d/conf.d/zulip/zulip_db.conf")
+        # Old path, relevant for upgrades
+        or os.path.exists("/etc/supervisord.d/conf.d/zulip_db.conf")
     )
 
 
